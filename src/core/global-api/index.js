@@ -65,5 +65,9 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   initUse(Vue)
   initMixin(Vue)
   initExtend(Vue)
+  {/* 这一步是注册了 `Vue.component` ,`Vue.directive` 和 `Vue.filter` 三个方法，
+  上面不是有 `Vue.options.components` 等空对象吗，
+  这三个方法的作用就是把注册的组件放入对应的容器中。 
+  显然可知该三方法为全局api*/}
   initAssetRegisters(Vue)
 }

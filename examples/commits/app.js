@@ -6,7 +6,7 @@ var apiURL = 'https://api.github.com/repos/vuejs/vue/commits?per_page=3&sha='
  * Actual demo
  */
 
-new Vue({
+const VueCompRoot = new Vue({
 
   el: '#demo',
 
@@ -54,3 +54,5 @@ new Vue({
     }
   }
 })
+
+console.log(VueCompRoot)

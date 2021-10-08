@@ -339,8 +339,15 @@ export function stateMixin (Vue: Class<Component>) {
       warn(`$props is readonly.`, this)
     }
   }
+  /*
+  * 注意下面这种在原型上定义属性的写法:
+  * 此时的 $data、$props虽然还在构造函数的原型上，
+  * 但是在实例化时，该属性会「直接创建一份到实例化对象」上!!!!
+  * 实例化时做了什么事？？？
+  */ 
   Object.defineProperty(Vue.prototype, '$data', dataDef)
   Object.defineProperty(Vue.prototype, '$props', propsDef)
+  // Object.defineProperty(Vue.prototype, '$ddddd', propsDef)
 
   Vue.prototype.$set = set
   Vue.prototype.$delete = del
