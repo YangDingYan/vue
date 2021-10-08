@@ -5089,9 +5089,13 @@
     this._init(options);
   }
 
-  initMixin(Vue);
-  stateMixin(Vue);
-  eventsMixin(Vue);
+  /* 
+    创建构造函数Vue, 及其上所有将被使用的「全局方法 + 实例方法」
+    Vue.xxx  +  Vue.propotype.xx
+  */
+  initMixin(Vue); // 「实例化启动入口」【会调用下面预挂载的各种属性和方法】：主要添加了 _.init()【fn】
+  stateMixin(Vue); // 主要添加了$data【ud】, $props【ud】;   数据状态方法：$watch【fn】, $set【fn】, $delete【fn】  
+  eventsMixin(Vue); // 
   lifecycleMixin(Vue);
   renderMixin(Vue);
 
@@ -11924,6 +11928,8 @@
   var shouldDecodeNewlinesForHref = inBrowser ? getShouldDecode(true) : false;
 
   /*  */
+
+  /* 从 scripts/config.js 中可以识别出本文件是 [runtime + compiler] 版本的 [入口] */
 
   var idToTemplate = cached(function (id) {
     var el = query(id);

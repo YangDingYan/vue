@@ -9,6 +9,8 @@ import { query } from './util/index'
 import { compileToFunctions } from './compiler/index'
 import { shouldDecodeNewlines, shouldDecodeNewlinesForHref } from './util/compat'
 
+/* 从 scripts/config.js 中可以识别出本文件是 [runtime + compiler] 版本的 [入口] */
+
 const idToTemplate = cached(id => {
   const el = query(id)
   return el && el.innerHTML
