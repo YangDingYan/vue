@@ -15,7 +15,7 @@ let uid = 0
 export function initMixin (Vue: Class<Component>) {
   Vue.prototype._init = function (options?: Object) {
     const vm: Component = this
-    // a uid
+    // a uid 标记组件实例的个数(标识)
     vm._uid = uid++
 
     let startTag, endTag
@@ -49,7 +49,7 @@ export function initMixin (Vue: Class<Component>) {
     }
     // expose real self
     vm._self = vm
-    initLifecycle(vm)
+    initLifecycle(vm) // 生命周期初始化工作, 初始化了很多变量。最关键是设置了父子组件间的引用关系「」, 
     initEvents(vm)
     initRender(vm)
     callHook(vm, 'beforeCreate')
