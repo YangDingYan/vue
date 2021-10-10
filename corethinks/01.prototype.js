@@ -10,6 +10,9 @@ function Vue(options) {
 initMixin(Vue);
 
 function initMixin(Vue) {
+    Vue.noExtendToVm = { // 该属性并不会被实例继承，
+        directives: []
+    }
     Object.defineProperty(Vue.prototype, '$data', {
         get: function () {
             return this._data; 

@@ -4935,9 +4935,9 @@
     }
     /*
     * 注意下面这种在原型上定义属性的写法:
-    * 此时的 $data、$props虽然还在构造函数的原型上，
-    * 但是在实例化时，该属性会「直接创建一份到实例化对象」上!!!!
-    * 实例化时做了什么事？？？
+    * 此时的 $data、$props 虽然是定义在构造函数的原型上，
+    * 但是在实例化时，该属性会「直接创建一份到实例化对象」上!!!! (vm.$data、vm.$props)
+    ! 实例化时做了什么事，Object.defineProperty的某种特性？
     */ 
     Object.defineProperty(Vue.prototype, '$data', dataDef);
     Object.defineProperty(Vue.prototype, '$props', propsDef);
@@ -4976,8 +4976,8 @@
 
   function initMixin (Vue) {
     Vue.prototype._init = function (options) {
-      var vm = this;
-      // a uid
+      var vm = this; //key: this 在 new Vue() 之后, 已经指代当前解析的实例对象了 「对象引用」
+      // a uid 标记组件实例的个数(标识)
       vm._uid = uid$2++;
 
       var startTag, endTag;
@@ -4991,12 +4991,16 @@
       // a flag to avoid this being observed
       vm._isVue = true;
       // merge options
+      //? options._isComponent的作用？  => 暂时只需要知道我们自己开发的时候使用的组件，都不是 _isComponent
       if (options && options._isComponent) {
         // optimize internal component instantiation
         // since dynamic options merging is pretty slow, and none of the
         // internal component options needs special treatment.
         initInternalComponent(vm, options);
       } else {
+        //key：mergeOptions主要做了一个关于 vm.$options的合并操作 
+        //* 把构造函数[对象]上的options和创建组件传入的options合并在一起了 => 「组件实例上直接具有了全局某些属性，即全局directives之类的可以直接用了」
+        //key: 因为全局的属性和方法是作为构造函数Vue的独立对象属性存在的，所以实例化的时候，vm自身和原型上都访问不到这些属性
         vm.$options = mergeOptions(
           resolveConstructorOptions(vm.constructor),
           options || {},
@@ -5004,27 +5008,31 @@
         );
       }
       /* istanbul ignore else */
+      //key 知道渲染模板的时候上下文就是 vm 也就是 this 
       {
         initProxy(vm);
       }
       // expose real self
-      vm._self = vm;
-      initLifecycle(vm);
-      initEvents(vm);
-      initRender(vm);
-      callHook(vm, 'beforeCreate');
-      initInjections(vm); // resolve injections before data/props
-      initState(vm);
-      initProvide(vm); // resolve provide after data/props
-      callHook(vm, 'created');
+      vm._self = vm;  // 自身持有自身[引用类型哦]
+      initLifecycle(vm); //* 生命周期的初始化工作, 初始化了很多变量。最主要是设置了父子组件间的引用关系「即新增了 $parent/$children 属性/值 来构建」 【Lifecycle】
+      initEvents(vm); //* 注册事件。注意：这里注册的不是自己的，而是父组件的。因为很明显父组件的监听器才会注册到子组件身上      【Event】
+      initRender(vm); //* render执行前的准备工作，并未真的开始执行。比如处理父子继承关系等
+      callHook(vm, 'beforeCreate'); //! 准备工作完成，接下来进入「create」阶段
+      initInjections(vm); // resolve injections before data/props         【inject】
+      initState(vm); //* 「options.props、methods、data、computed、watch」按顺序在这里初始化 
+                    //? [响应式系统]：和数据状态有关的几项，在构建时时有上述执行的[顺序]的 ？ 【reactivity】
+      initProvide(vm); // resolve provide after data/props                【provide】
+      callHook(vm, 'created'); //! 「create」阶段完成
 
-      /* istanbul ignore if */
+      /* istanbul ignore if -- 性能数据收集 */
       if ( config.performance && mark) {
         vm._name = formatComponentName(vm, false);
         mark(endTag);
         measure(("vue " + (vm._name) + " init"), startTag, endTag);
       }
 
+      //* 根据有无el开始mount：显然，vm自身一定有$mount这个方法了
+      //? 参看 platforms/web/runtime/index.js 里的操作
       if (vm.$options.el) {
         vm.$mount(vm.$options.el);
       }
@@ -5093,15 +5101,15 @@
     ) {
       warn('Vue is a constructor and should be called with the `new` keyword');
     }
-    this._init(options);
+    this._init(options); //key:这里的this在 new Vue()时，会变成 实例的上下文
   }
 
   /* 
-    创建构造函数Vue, 及其上所有将被使用的「全局方法 + 实例方法」
-    Vue.xxx  +  Vue.propotype.xx
+  * 创建构造函数Vue, 及其上所有将被使用的「全局方法 + 实例方法」
+  * Vue.xxx  +  Vue.propotype.xx
   */
-  initMixin(Vue); // 「实例化启动入口」【会调用下面预挂载的各种属性和方法】：主要添加了 _.init()【fn】
-  stateMixin(Vue); // 主要添加了$data【ud】, $props【ud】;   数据状态方法：$watch【fn】, $set【fn】, $delete【fn】  
+  initMixin(Vue); //* 「实例化启动入口」【会调用下面预挂载的各种属性和方法】：主要添加了 _.init()【fn】
+  stateMixin(Vue); //* 主要添加了$data【ud】, $props【ud】;   数据状态方法：$watch【fn】, $set【fn】, $delete【fn】  
   eventsMixin(Vue); // 
   lifecycleMixin(Vue);
   renderMixin(Vue);
