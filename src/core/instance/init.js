@@ -38,7 +38,7 @@ export function initMixin (Vue: Class<Component>) {
     } else {
       //key：mergeOptions主要做了一个关于 vm.$options的合并操作 
       //* 把构造函数[对象]上的options和创建组件传入的options合并在一起了 => 「组件实例上直接具有了全局某些属性，即全局directives之类的可以直接用了」
-      //key: 因为全局的属性和方法是作为构造函数Vue的独立对象属性存在的，所以实例化的时候，vm自身和原型上都访问不到这些属性
+      //key: 因为全局的属性和方法是作为构造函数Vue的对象属性存在的，所以实例化的时候，vm自身和原型上都访问不到这些属性;只有Vue.xx能获取到
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),
         options || {},

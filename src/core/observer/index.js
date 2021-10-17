@@ -41,7 +41,7 @@ export class Observer {
 
   constructor (value: any) {
     this.value = value
-    this.dep = new Dep()
+    this.dep = new Dep() //todo : 注意这个Dep()有多次实例化的操作？
     this.vmCount = 0
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
@@ -102,6 +102,7 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
   }
 }
 
+//! 这个注释太清晰喽
 /**
  * Attempt to create an observer instance for a value,
  * returns the new observer if successfully observed,
@@ -113,7 +114,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
   }
   let ob: Observer | void
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
-    ob = value.__ob__
+    ob = value.__ob__ //* 每个成功响应化的对象【key】，都会被挂上 __ob__ 属性，避免多此操作
   } else if (
     shouldObserve &&
     !isServerRendering() &&
@@ -121,7 +122,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     Object.isExtensible(value) &&
     !value._isVue
   ) {
-    ob = new Observer(value)
+    ob = new Observer(value) //? key：这里是核心, 好像就是 基于value【data/】创建一个实例 ？
   }
   if (asRootData && ob) {
     ob.vmCount++

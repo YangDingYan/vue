@@ -6,12 +6,12 @@ import Dep, { pushTarget, popTarget } from '../observer/dep'
 import { isUpdatingChildComponent } from './lifecycle'
 
 import {
-  set,
-  del,
-  observe,
-  defineReactive,
-  toggleObserving
-} from '../observer/index'
+  set, //! 仅使用在 Vue.prototype.$set = set 
+  del, //! 仅使用在  Vue.prototype.$delete = del 
+  observe, //! 只在 initState、initData中使用
+  defineReactive,             //todo ! initProps里 
+  toggleObserving             //todo ! initProps里
+} from '../observer/index' //? 响应式系统的函数
 
 import {
   warn,
@@ -29,6 +29,7 @@ import {
   invokeWithErrorHandling
 } from '../util/index'
 
+//! props,data,computed代理到vm上的 [通用写法]
 const sharedPropertyDefinition = {
   enumerable: true,
   configurable: true,
@@ -46,15 +47,16 @@ export function proxy (target: Object, sourceKey: string, key: string) {
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
+//*0. 实例初始化动作 开始
 export function initState (vm: Component) {
-  vm._watchers = []
+  vm._watchers = []  //*0-1 key: 每个实例自身都会有 vm._watcher 属性用以 存储所有相关的 '响应式监听'
   const opts = vm.$options
   if (opts.props) initProps(vm, opts.props)
   if (opts.methods) initMethods(vm, opts.methods)
   if (opts.data) {
     initData(vm)
   } else {
-    observe(vm._data = {}, true /* asRootData */)
+    observe(vm._data = {}, true /* asRootData */) //TODO 应该是处理：已继承后的子组件
   }
   if (opts.computed) initComputed(vm, opts.computed)
   if (opts.watch && opts.watch !== nativeWatch) {
@@ -62,6 +64,7 @@ export function initState (vm: Component) {
   }
 }
 
+//*1. 
 function initProps (vm: Component, propsOptions: Object) {
   const propsData = vm.$options.propsData || {}
   const props = vm._props = {}
@@ -110,10 +113,11 @@ function initProps (vm: Component, propsOptions: Object) {
   toggleObserving(true)
 }
 
+//*3. key: 初始化data : []
 function initData (vm: Component) {
   let data = vm.$options.data
   data = vm._data = typeof data === 'function'
-    ? getData(data, vm)
+    ? getData(data, vm)                                //! 把options.data取出来「多存几处」
     : data || {}
   if (!isPlainObject(data)) {
     data = {}
@@ -145,26 +149,27 @@ function initData (vm: Component) {
         vm
       )
     } else if (!isReserved(key)) {
-      proxy(vm, `_data`, key)
+      proxy(vm, `_data`, key) //? key: 数据代理[将options.data => this._data => this.data => this.xxx]
     }
   }
   // observe data
-  observe(data, true /* asRootData */)
+  observe(data, true /* asRootData */) //? key: 框架核心: 响应式系统的构建开始 ===>
 }
 
 export function getData (data: Function, vm: Component): any {
   // #7573 disable dep collection when invoking data getters
-  pushTarget()
+  pushTarget() //TODO ? think: 和依赖收集有关的操作: 像是后期在缺陷中修改的？
   try {
-    return data.call(vm, vm)
+    return data.call(vm, vm) //* 等价于 执行了 return vm.data(vm);   所以data也会是一个函数呢!
   } catch (e) {
     handleError(e, vm, `data()`)
     return {}
   } finally {
-    popTarget()
+    popTarget() //TODO ? think: 和依赖收集有关的操作: 
   }
 }
 
+//*4.
 const computedWatcherOptions = { lazy: true }
 
 function initComputed (vm: Component, computed: Object) {
@@ -262,6 +267,7 @@ function createGetterInvoker(fn) {
   }
 }
 
+//*2. 
 function initMethods (vm: Component, methods: Object) {
   const props = vm.$options.props
   for (const key in methods) {
@@ -290,6 +296,7 @@ function initMethods (vm: Component, methods: Object) {
   }
 }
 
+//*5. 
 function initWatch (vm: Component, watch: Object) {
   for (const key in watch) {
     const handler = watch[key]
@@ -319,6 +326,7 @@ function createWatcher (
   return vm.$watch(expOrFn, handler, options)
 }
 
+// 构造函数创建时混入函数
 export function stateMixin (Vue: Class<Component>) {
   // flow somehow has problems with directly declared definition object
   // when using Object.defineProperty, so we have to procedurally build up
@@ -375,3 +383,11 @@ export function stateMixin (Vue: Class<Component>) {
     }
   }
 }
+
+
+/*
+  思考：
+ * 1. state相关的初始化顺序有什么影响？ 各state相关的属性有没有优先级？ 提示和冲突是怎么解决的？
+ * 
+ * 
+ * /
