@@ -50,17 +50,18 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 //*0. 实例初始化动作 开始
 export function initState (vm: Component) {
   vm._watchers = []  //*0-1 key: 每个实例自身都会有 vm._watcher 属性用以 存储所有相关的 '响应式监听'
+                     //* vm(某个组件-单文本组件也算)上「所有的Watcher」都会存储到这里进行管理
   const opts = vm.$options
-  if (opts.props) initProps(vm, opts.props)
-  if (opts.methods) initMethods(vm, opts.methods)
+  if (opts.props) initProps(vm, opts.props) //* vm.props
+  if (opts.methods) initMethods(vm, opts.methods) //* vm.methods
   if (opts.data) {
-    initData(vm)
+    initData(vm) //* vm.data
   } else {
     observe(vm._data = {}, true /* asRootData */) //TODO 应该是处理：已继承后的子组件
   }
-  if (opts.computed) initComputed(vm, opts.computed)
-  if (opts.watch && opts.watch !== nativeWatch) {
-    initWatch(vm, opts.watch)
+  if (opts.computed) initComputed(vm, opts.computed) //* vm.computed
+  if (opts.watch && opts.watch !== nativeWatch) { 
+    initWatch(vm, opts.watch) //* vm.watch
   }
 }
 

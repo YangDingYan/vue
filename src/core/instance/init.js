@@ -55,7 +55,7 @@ export function initMixin (Vue: Class<Component>) {
     // expose real self
     vm._self = vm  // 自身持有自身[引用类型哦]
     initLifecycle(vm) //* 生命周期的初始化工作, 初始化了很多变量。最主要是设置了父子组件间的引用关系「即新增了 $parent/$children 属性/值 来构建」 【Lifecycle】
-    initEvents(vm) //* 注册事件。注意：这里注册的不是自己的，而是父组件的。因为很明显父组件的监听器才会注册到子组件身上      【Event】
+    initEvents(vm) //* 注册事件。注意：这里注册的不是自己的，而是父组件的。因为很明显父组件的监听器才会注册到子组件身上     【Event】
     initRender(vm) //* render执行前的准备工作，并未真的开始执行。比如处理父子继承关系等
     callHook(vm, 'beforeCreate') //! 准备工作完成，接下来进入「create」阶段
     initInjections(vm) // resolve injections before data/props         【inject】
