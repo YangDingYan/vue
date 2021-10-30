@@ -5,6 +5,13 @@ var apiURL = 'https://api.github.com/repos/vuejs/vue/commits?per_page=3&sha='
 /**
  * Actual demo
  */
+Vue.use({
+  install() {
+    
+  }
+})
+
+console.log('window', window);
 
 const VueCompRoot = new Vue({
 

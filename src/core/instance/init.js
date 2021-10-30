@@ -72,6 +72,7 @@ export function initMixin (Vue: Class<Component>) {
     }
 
     //* 根据有无el开始mount：显然，vm自身一定有$mount这个方法了
+    //* 由于和 平台 有关, $mount在下述位置添加
     //? 参看 platforms/web/runtime/index.js 里的操作
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
