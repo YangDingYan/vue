@@ -73,7 +73,7 @@ Vue.prototype.$mount = function (
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
         mark('compile')
       }
-
+      //? 源码中对 编译器 的设计挺复杂的
       const { render, staticRenderFns } = compileToFunctions(template, {
         outputSourceRange: process.env.NODE_ENV !== 'production',
         shouldDecodeNewlines,
@@ -91,6 +91,7 @@ Vue.prototype.$mount = function (
       }
     }
   }
+  //! 挂载DOM => Tree上
   //? 无论是template模板还是手写render函数最终调用缓存的$mount方法
   //* 用当前活跃的 vm对象this 来执行挂载 ==> 其实就是挂载当前的实例
   return mount.call(this, el, hydrating)

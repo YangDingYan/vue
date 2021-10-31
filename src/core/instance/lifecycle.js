@@ -165,7 +165,7 @@ export function mountComponent (
     }
   }
   callHook(vm, 'beforeMount')
-
+   // 定义updateComponent方法，在watch回调时调用
   let updateComponent
   /* istanbul ignore if */
   if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
@@ -187,6 +187,7 @@ export function mountComponent (
     }
   } else {
     updateComponent = () => {
+      //? render函数渲染成虚拟DOM， 虚拟DOM渲染成真实的DOM
       vm._update(vm._render(), hydrating)
     }
   }

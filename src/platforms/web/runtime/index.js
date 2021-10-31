@@ -35,12 +35,13 @@ Vue.prototype.__patch__ = inBrowser ? patch : noop
 
 // public mount method
 //? 通用的 浏览器端-挂载组件-的方法, 这里没有 ‘模板编译’ 的流程 
+// 内部真正实现挂载的方法
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
   el = el && inBrowser ? query(el) : undefined
-  return mountComponent(this, el, hydrating)
+  return mountComponent(this, el, hydrating)    //? 调用mountComponent方法挂载
 }
 
 // devtools global hook
