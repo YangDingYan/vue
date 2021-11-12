@@ -138,6 +138,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
   }
 }
 
+//* 用来执行[render => vnode tree => 渲染], 归属于web平台, 在platforms/web/runtime/index.js的$mount上调用
 export function mountComponent (
   vm: Component,
   el: ?Element,
@@ -164,6 +165,7 @@ export function mountComponent (
       }
     }
   }
+  //! 生命周期呀: beforeMount
   callHook(vm, 'beforeMount')
    // 定义updateComponent方法，在watch回调时调用
   let updateComponent

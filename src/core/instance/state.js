@@ -49,7 +49,7 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 
 //*0. 实例初始化动作 开始
 export function initState (vm: Component) {
-  vm._watchers = []  //*0-1 key: 每个实例自身都会有 vm._watcher 属性用以 存储所有相关的 '响应式监听'
+  vm._watchers = []  //*0-1 key: 每个实例自身都会有 vm._watchers 属性用以 存储所有相关的 '响应式监听'
                      //* vm(某个组件-单文本组件也算)上「所有的Watcher」都会存储到这里进行管理
   const opts = vm.$options
   if (opts.props) initProps(vm, opts.props) //* vm.props
@@ -107,6 +107,7 @@ function initProps (vm: Component, propsOptions: Object) {
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
     // instantiation here.
+    // 在Vue.extend（）期间,静态props已经在组件的原型上代理。在这里实例化时,我们只需要代理已定义的props
     if (!(key in vm)) {
       proxy(vm, `_props`, key)
     }
@@ -161,7 +162,7 @@ export function getData (data: Function, vm: Component): any {
   // #7573 disable dep collection when invoking data getters
   pushTarget() //TODO ? think: 和依赖收集有关的操作: 像是后期在缺陷中修改的？
   try {
-    return data.call(vm, vm) //* 等价于 执行了 return vm.data(vm);   所以data也会是一个函数呢!
+    return data.call(vm, vm) //* 等价于 执行了 return vm.data(vm); 所以data也会是一个函数呢!
   } catch (e) {
     handleError(e, vm, `data()`)
     return {}
@@ -354,7 +355,7 @@ export function stateMixin (Vue: Class<Component>) {
   * 但是在实例化时，该属性会「直接创建一份到实例化对象」上!!!! (vm.$data、vm.$props)
   ! 实例化时做了什么事，Object.defineProperty的某种特性？
   */ 
-  Object.defineProperty(Vue.prototype, '$data', dataDef)
+  Object.defineProperty(Vue.prototype, '$data', dataDef) //* 就是 this.$data => this._data 
   Object.defineProperty(Vue.prototype, '$props', propsDef)
   // Object.defineProperty(Vue.prototype, '$ddddd', propsDef)
 
