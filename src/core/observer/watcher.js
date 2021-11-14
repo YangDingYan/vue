@@ -44,11 +44,11 @@ export default class Watcher {
   value: any;
 
   constructor (
-    vm: Component,
-    expOrFn: string | Function,
-    cb: Function,
+    vm: Component,                  //* 该watcher实例归属于的 vm实例 
+    expOrFn: string | Function,     //! 可能是'data.a.b'的watcher + 可执行的函数型watcher [computed + renderWatcher] 
+    cb: Function,                   //!
     options?: ?Object,
-    isRenderWatcher?: boolean
+    isRenderWatcher?: boolean       //* 当前是否为renderWatcher
   ) {
     this.vm = vm
     if (isRenderWatcher) {
@@ -76,9 +76,9 @@ export default class Watcher {
     this.expression = process.env.NODE_ENV !== 'production'
       ? expOrFn.toString()
       : ''
-    // parse expression for getter
+    //! parse expression for getter
     if (typeof expOrFn === 'function') {
-      this.getter = expOrFn
+      this.getter = expOrFn              //* renderWatcher中, 此处为 渲染流程:() => { vm._update(vm._render(), hydrating) }
     } else {
       this.getter = parsePath(expOrFn)
       if (!this.getter) {
@@ -99,12 +99,13 @@ export default class Watcher {
   /**
    * Evaluate the getter, and re-collect dependencies.
    */
+  //! fn get: 1. 为了把 初始化创建的watcher 主动地 挂到对应的Deps里去   2.renderWatcher中启动渲染
   get () {
     pushTarget(this)
     let value
     const vm = this.vm
     try {
-      value = this.getter.call(vm, vm)
+      value = this.getter.call(vm, vm) 
     } catch (e) {
       if (this.user) {
         handleError(e, vm, `getter for watcher "${this.expression}"`)
