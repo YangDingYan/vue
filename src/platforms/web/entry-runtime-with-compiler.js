@@ -81,7 +81,7 @@ Vue.prototype.$mount = function (
         delimiters: options.delimiters,
         comments: options.comments
       }, this)
-      options.render = render
+      options.render = render //* 这时实例上真实的render函数
       options.staticRenderFns = staticRenderFns
 
       /* istanbul ignore if */
@@ -94,6 +94,7 @@ Vue.prototype.$mount = function (
   //! 挂载DOM => Tree上
   //? 无论是template模板还是手写render函数最终调用缓存的$mount方法
   //* 用当前活跃的 vm对象this 来执行挂载 ==> 其实就是挂载当前的实例
+  console.log(`实例vm-${this._uid}的render已获得，开始真正的mount`, this.$options.render)
   return mount.call(this, el, hydrating)
 }
 

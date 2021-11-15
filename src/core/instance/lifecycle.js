@@ -197,7 +197,7 @@ export function mountComponent (
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
-  new Watcher(vm, updateComponent, noop, {
+  const a = new Watcher(vm, updateComponent, noop, {
     before () {
       if (vm._isMounted && !vm._isDestroyed) {
         callHook(vm, 'beforeUpdate')
@@ -206,6 +206,7 @@ export function mountComponent (
   }, true /* isRenderWatcher */)
   hydrating = false
 
+  console.log(`实例vm-${vm._uid}上创建了renderWatchr: 它一创建好, 就执行了`, a)
   // manually mounted instance, call mounted on self
   // mounted is called for render-created child components in its inserted hook
   if (vm.$vnode == null) {

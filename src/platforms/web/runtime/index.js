@@ -41,6 +41,7 @@ Vue.prototype.$mount = function (
   hydrating?: boolean
 ): Component {
   el = el && inBrowser ? query(el) : undefined
+  console.log(`实例vm-${this._uid}内部的挂载即将开始`)
   return mountComponent(this, el, hydrating)    //? 调用mountComponent方法挂载
 }
 

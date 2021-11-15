@@ -389,7 +389,5 @@ export function stateMixin (Vue: Class<Component>) {
 
 /*
   思考：
- * 1. state相关的初始化顺序有什么影响？ 各state相关的属性有没有优先级？ 提示和冲突是怎么解决的？
- * 
- * 
- * /
+    1. state相关的初始化顺序有什么影响？ 各state相关的属性有没有优先级？ 提示和冲突是怎么解决的？
+*/

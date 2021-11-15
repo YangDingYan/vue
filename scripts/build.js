@@ -71,6 +71,8 @@ function write (dest, code, zip) {
       resolve()
     }
 
+    code += '//# sourceMappingURL=vue.js.map'
+    
     fs.writeFile(dest, code, err => {
       if (err) return reject(err)
       if (zip) {

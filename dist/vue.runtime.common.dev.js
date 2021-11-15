@@ -722,7 +722,7 @@ Dep.prototype.depend = function depend () {
 Dep.prototype.notify = function notify () {
   // stabilize the subscriber list first
   var subs = this.subs.slice();
-  if (!config.async) {
+  if ( !config.async) {
     // subs aren't sorted in scheduler if not running async
     // we need to sort them now to make sure they fire in correct
     // order
@@ -908,7 +908,7 @@ function toggleObserving (value) {
  */
 var Observer = function Observer (value) {
   this.value = value;
-  this.dep = new Dep();
+  this.dep = new Dep(); //todo : 注意这个Dep()有多次实例化的操作？
   this.vmCount = 0;
   def(value, '__ob__', this);
   if (Array.isArray(value)) {
@@ -931,7 +931,7 @@ var Observer = function Observer (value) {
 Observer.prototype.walk = function walk (obj) {
   var keys = Object.keys(obj);
   for (var i = 0; i < keys.length; i++) {
-    defineReactive$$1(obj, keys[i]);
+    defineReactive(obj, keys[i]);
   }
 };
 
@@ -968,6 +968,7 @@ function copyAugment (target, src, keys) {
   }
 }
 
+//! 这个注释太清晰喽
 /**
  * Attempt to create an observer instance for a value,
  * returns the new observer if successfully observed,
@@ -979,7 +980,7 @@ function observe (value, asRootData) {
   }
   var ob;
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
-    ob = value.__ob__;
+    ob = value.__ob__; //* 每个成功响应化的对象【key】，都会被挂上 __ob__ 属性，避免多次操作
   } else if (
     shouldObserve &&
     !isServerRendering() &&
@@ -987,7 +988,7 @@ function observe (value, asRootData) {
     Object.isExtensible(value) &&
     !value._isVue
   ) {
-    ob = new Observer(value);
+    ob = new Observer(value); //? key：这里是核心, 好像就是 基于value【data/】创建一个Observer实例 ？
   }
   if (asRootData && ob) {
     ob.vmCount++;
@@ -998,7 +999,7 @@ function observe (value, asRootData) {
 /**
  * Define a reactive property on an Object.
  */
-function defineReactive$$1 (
+function defineReactive (
   obj,
   key,
   val,
@@ -1043,7 +1044,7 @@ function defineReactive$$1 (
         return
       }
       /* eslint-enable no-self-compare */
-      if (customSetter) {
+      if ( customSetter) {
         customSetter();
       }
       // #7981: for accessor properties without setter
@@ -1065,7 +1066,8 @@ function defineReactive$$1 (
  * already exist.
  */
 function set (target, key, val) {
-  if (isUndef(target) || isPrimitive(target)
+  if (
+    (isUndef(target) || isPrimitive(target))
   ) {
     warn(("Cannot set reactive property on undefined, null, or primitive value: " + ((target))));
   }
@@ -1080,7 +1082,7 @@ function set (target, key, val) {
   }
   var ob = (target).__ob__;
   if (target._isVue || (ob && ob.vmCount)) {
-    warn(
+     warn(
       'Avoid adding reactive properties to a Vue instance or its root $data ' +
       'at runtime - declare it upfront in the data option.'
     );
@@ -1090,7 +1092,7 @@ function set (target, key, val) {
     target[key] = val;
     return val
   }
-  defineReactive$$1(ob.value, key, val);
+  defineReactive(ob.value, key, val);
   ob.dep.notify();
   return val
 }
@@ -1099,7 +1101,8 @@ function set (target, key, val) {
  * Delete a property and trigger change if necessary.
  */
 function del (target, key) {
-  if (isUndef(target) || isPrimitive(target)
+  if (
+    (isUndef(target) || isPrimitive(target))
   ) {
     warn(("Cannot delete reactive property on undefined, null, or primitive value: " + ((target))));
   }
@@ -1109,7 +1112,7 @@ function del (target, key) {
   }
   var ob = (target).__ob__;
   if (target._isVue || (ob && ob.vmCount)) {
-    warn(
+     warn(
       'Avoid deleting properties on a Vue instance or its root $data ' +
       '- just set it to null.'
     );
@@ -1245,7 +1248,7 @@ strats.data = function (
 ) {
   if (!vm) {
     if (childVal && typeof childVal !== 'function') {
-      warn(
+       warn(
         'The "data" option should be a function ' +
         'that returns a per-instance value in component ' +
         'definitions.',
@@ -1308,7 +1311,7 @@ function mergeAssets (
 ) {
   var res = Object.create(parentVal || null);
   if (childVal) {
-    assertObjectType(key, childVal, vm);
+     assertObjectType(key, childVal, vm);
     return extend(res, childVal)
   } else {
     return res
@@ -1483,9 +1486,9 @@ function normalizeDirectives (options) {
   var dirs = options.directives;
   if (dirs) {
     for (var key in dirs) {
-      var def$$1 = dirs[key];
-      if (typeof def$$1 === 'function') {
-        dirs[key] = { bind: def$$1, update: def$$1 };
+      var def = dirs[key];
+      if (typeof def === 'function') {
+        dirs[key] = { bind: def, update: def };
       }
     }
   }
@@ -1578,7 +1581,7 @@ function resolveAsset (
   if (hasOwn(assets, PascalCaseId)) { return assets[PascalCaseId] }
   // fallback to prototype chain
   var res = assets[id] || assets[camelizedId] || assets[PascalCaseId];
-  if (warnMissing && !res) {
+  if ( warnMissing && !res) {
     warn(
       'Failed to resolve ' + type.slice(0, -1) + ': ' + id,
       options
@@ -1640,7 +1643,7 @@ function getPropDefaultValue (vm, prop, key) {
   }
   var def = prop.default;
   // warn against non-factory defaults for Object & Array
-  if (isObject(def)) {
+  if ( isObject(def)) {
     warn(
       'Invalid default value for prop "' + key + '": ' +
       'Props with type Object/Array must use a factory function ' +
@@ -2002,8 +2005,6 @@ function nextTick (cb, ctx) {
   }
 }
 
-/*  */
-
 /* not type checking this file because flow doesn't play well with Proxy */
 
 var initProxy;
@@ -2157,13 +2158,13 @@ var measure;
 var normalizeEvent = cached(function (name) {
   var passive = name.charAt(0) === '&';
   name = passive ? name.slice(1) : name;
-  var once$$1 = name.charAt(0) === '~'; // Prefixed last, checked first
-  name = once$$1 ? name.slice(1) : name;
+  var once = name.charAt(0) === '~'; // Prefixed last, checked first
+  name = once ? name.slice(1) : name;
   var capture = name.charAt(0) === '!';
   name = capture ? name.slice(1) : name;
   return {
     name: name,
-    once: once$$1,
+    once: once,
     capture: capture,
     passive: passive
   }
@@ -2192,17 +2193,17 @@ function updateListeners (
   on,
   oldOn,
   add,
-  remove$$1,
+  remove,
   createOnceHandler,
   vm
 ) {
-  var name, def$$1, cur, old, event;
+  var name, def, cur, old, event;
   for (name in on) {
-    def$$1 = cur = on[name];
+    def = cur = on[name];
     old = oldOn[name];
     event = normalizeEvent(name);
     if (isUndef(cur)) {
-      warn(
+       warn(
         "Invalid handler for event \"" + (event.name) + "\": got " + String(cur),
         vm
       );
@@ -2222,7 +2223,7 @@ function updateListeners (
   for (name in oldOn) {
     if (isUndef(on[name])) {
       event = normalizeEvent(name);
-      remove$$1(event.name, oldOn[name], event.capture);
+      remove(event.name, oldOn[name], event.capture);
     }
   }
 }
@@ -2435,7 +2436,7 @@ function initInjections (vm) {
     Object.keys(result).forEach(function (key) {
       /* istanbul ignore else */
       {
-        defineReactive$$1(vm, key, result[key], function () {
+        defineReactive(vm, key, result[key], function () {
           warn(
             "Avoid mutating an injected value directly since the changes will be " +
             "overwritten whenever the provided component re-renders. " +
@@ -2686,7 +2687,7 @@ function renderSlot (
     // scoped slot
     props = props || {};
     if (bindObject) {
-      if (!isObject(bindObject)) {
+      if ( !isObject(bindObject)) {
         warn('slot v-bind without argument expects an Object', this);
       }
       props = extend(extend({}, bindObject), props);
@@ -2764,7 +2765,7 @@ function bindObjectProps (
 ) {
   if (value) {
     if (!isObject(value)) {
-      warn(
+       warn(
         'v-bind without argument expects an Object or Array value',
         this
       );
@@ -2872,7 +2873,7 @@ function markStaticNode (node, key, isOnce) {
 function bindObjectListeners (data, value) {
   if (value) {
     if (!isPlainObject(value)) {
-      warn(
+       warn(
         'v-on without argument expects an Object value',
         this
       );
@@ -2923,7 +2924,7 @@ function bindDynamicKeys (baseObj, values) {
     var key = values[i];
     if (typeof key === 'string' && key) {
       baseObj[values[i]] = values[i + 1];
-    } else if (key !== '' && key !== null) {
+    } else if ( key !== '' && key !== null) {
       // null is a special value for explicitly removing a binding
       warn(
         ("Invalid value for dynamic directive argument (expected string or null): " + key),
@@ -3103,12 +3104,6 @@ function mergeProps (to, from) {
     to[camelize(key)] = from[key];
   }
 }
-
-/*  */
-
-/*  */
-
-/*  */
 
 /*  */
 
@@ -3376,7 +3371,7 @@ function _createElement (
   normalizationType
 ) {
   if (isDef(data) && isDef((data).__ob__)) {
-    warn(
+     warn(
       "Avoid using observed data object as vnode data: " + (JSON.stringify(data)) + "\n" +
       'Always create fresh vnode data objects in each render!',
       context
@@ -3392,7 +3387,8 @@ function _createElement (
     return createEmptyVNode()
   }
   // warn against non-primitive key
-  if (isDef(data) && isDef(data.key) && !isPrimitive(data.key)
+  if (
+    isDef(data) && isDef(data.key) && !isPrimitive(data.key)
   ) {
     {
       warn(
@@ -3421,7 +3417,7 @@ function _createElement (
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag);
     if (config.isReservedTag(tag)) {
       // platform built-in elements
-      if (isDef(data) && isDef(data.nativeOn) && data.tag !== 'component') {
+      if ( isDef(data) && isDef(data.nativeOn) && data.tag !== 'component') {
         warn(
           ("The .native modifier for v-on is only valid on components but it was used on <" + tag + ">."),
           context
@@ -3513,10 +3509,10 @@ function initRender (vm) {
 
   /* istanbul ignore else */
   {
-    defineReactive$$1(vm, '$attrs', parentData && parentData.attrs || emptyObject, function () {
+    defineReactive(vm, '$attrs', parentData && parentData.attrs || emptyObject, function () {
       !isUpdatingChildComponent && warn("$attrs is readonly.", vm);
     }, true);
-    defineReactive$$1(vm, '$listeners', options._parentListeners || emptyObject, function () {
+    defineReactive(vm, '$listeners', options._parentListeners || emptyObject, function () {
       !isUpdatingChildComponent && warn("$listeners is readonly.", vm);
     }, true);
   }
@@ -3532,7 +3528,10 @@ function renderMixin (Vue) {
     return nextTick(fn, this)
   };
 
+  //*: 实例上用来执行vm.options.render的
   Vue.prototype._render = function () {
+    console.log(("--实例vm-" + (this._uid) + "执行了真正的render=>dom tree"));
+    
     var vm = this;
     var ref = vm.$options;
     var render = ref.render;
@@ -3562,7 +3561,7 @@ function renderMixin (Vue) {
       // return error render result,
       // or previous vnode to prevent render error causing blank component
       /* istanbul ignore else */
-      if (vm.$options.renderError) {
+      if ( vm.$options.renderError) {
         try {
           vnode = vm.$options.renderError.call(vm._renderProxy, vm.$createElement, e);
         } catch (e) {
@@ -3581,7 +3580,7 @@ function renderMixin (Vue) {
     }
     // return empty vnode in case the render function errored out
     if (!(vnode instanceof VNode)) {
-      if (Array.isArray(vnode)) {
+      if ( Array.isArray(vnode)) {
         warn(
           'Multiple root nodes returned from render function. Render function ' +
           'should return a single root node.',
@@ -3684,7 +3683,7 @@ function resolveAsyncComponent (
     });
 
     var reject = once(function (reason) {
-      warn(
+       warn(
         "Failed to resolve async component: " + (String(factory)) +
         (reason ? ("\nReason: " + reason) : '')
       );
@@ -3729,7 +3728,8 @@ function resolveAsyncComponent (
             timerTimeout = null;
             if (isUndef(factory.resolved)) {
               reject(
-                "timeout (" + (res.timeout) + "ms)"
+                 ("timeout (" + (res.timeout) + "ms)")
+                  
               );
             }
           }, res.timeout);
@@ -3757,8 +3757,6 @@ function getFirstComponentChild (children) {
     }
   }
 }
-
-/*  */
 
 /*  */
 
@@ -4017,6 +4015,7 @@ function lifecycleMixin (Vue) {
   };
 }
 
+//* 用来执行[render => vnode tree => 渲染], 归属于web平台, 在platforms/web/runtime/index.js的$mount上调用
 function mountComponent (
   vm,
   el,
@@ -4043,11 +4042,12 @@ function mountComponent (
       }
     }
   }
+  //! 生命周期呀: beforeMount
   callHook(vm, 'beforeMount');
-
+   // 定义updateComponent方法，在watch回调时调用
   var updateComponent;
   /* istanbul ignore if */
-  if (config.performance && mark) {
+  if ( config.performance && mark) {
     updateComponent = function () {
       var name = vm._name;
       var id = vm._uid;
@@ -4066,6 +4066,7 @@ function mountComponent (
     };
   } else {
     updateComponent = function () {
+      //? render函数渲染成虚拟DOM， 虚拟DOM渲染成真实的DOM
       vm._update(vm._render(), hydrating);
     };
   }
@@ -4073,7 +4074,7 @@ function mountComponent (
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
-  new Watcher(vm, updateComponent, noop, {
+  var a = new Watcher(vm, updateComponent, noop, {
     before: function before () {
       if (vm._isMounted && !vm._isDestroyed) {
         callHook(vm, 'beforeUpdate');
@@ -4082,6 +4083,7 @@ function mountComponent (
   }, true /* isRenderWatcher */);
   hydrating = false;
 
+  console.log(("实例vm-" + (vm._uid) + "上创建了renderWatchr: 它一创建好, 就执行了"), a);
   // manually mounted instance, call mounted on self
   // mounted is called for render-created child components in its inserted hook
   if (vm.$vnode == null) {
@@ -4313,7 +4315,7 @@ function flushSchedulerQueue () {
     has[id] = null;
     watcher.run();
     // in dev build, check and stop circular updates.
-    if (has[id] != null) {
+    if ( has[id] != null) {
       circular[id] = (circular[id] || 0) + 1;
       if (circular[id] > MAX_UPDATE_COUNT) {
         warn(
@@ -4399,7 +4401,7 @@ function queueWatcher (watcher) {
     if (!waiting) {
       waiting = true;
 
-      if (!config.async) {
+      if ( !config.async) {
         flushSchedulerQueue();
         return
       }
@@ -4412,7 +4414,7 @@ function queueWatcher (watcher) {
 
 
 
-var uid$2 = 0;
+var uid$1 = 0;
 
 /**
  * A watcher parses an expression, collects dependencies,
@@ -4420,11 +4422,11 @@ var uid$2 = 0;
  * This is used for both the $watch() api and directives.
  */
 var Watcher = function Watcher (
-  vm,
-  expOrFn,
-  cb,
+  vm,                //* 该watcher实例归属于的 vm实例 
+  expOrFn,   //! 可能是'data.a.b'的watcher[用户Watcher] + [computedWatcher + renderWatcher] 
+  cb,                 //!
   options,
-  isRenderWatcher
+  isRenderWatcher     //* 当前是否为renderWatcher
 ) {
   this.vm = vm;
   if (isRenderWatcher) {
@@ -4442,22 +4444,23 @@ var Watcher = function Watcher (
     this.deep = this.user = this.lazy = this.sync = false;
   }
   this.cb = cb;
-  this.id = ++uid$2; // uid for batching
+  this.id = ++uid$1; // uid for batching
   this.active = true;
   this.dirty = this.lazy; // for lazy watchers
   this.deps = [];
   this.newDeps = [];
   this.depIds = new _Set();
   this.newDepIds = new _Set();
-  this.expression = expOrFn.toString();
-  // parse expression for getter
+  this.expression =  expOrFn.toString()
+    ;
+  //! parse expression for getter
   if (typeof expOrFn === 'function') {
-    this.getter = expOrFn;
+    this.getter = expOrFn;            //* renderWatcher中, 此处为 渲染流程:() => { vm._update(vm._render(), hydrating) }
   } else {
     this.getter = parsePath(expOrFn);
     if (!this.getter) {
       this.getter = noop;
-      warn(
+       warn(
         "Failed watching path: \"" + expOrFn + "\" " +
         'Watcher only accepts simple dot-delimited paths. ' +
         'For full control, use a function instead.',
@@ -4473,12 +4476,14 @@ var Watcher = function Watcher (
 /**
  * Evaluate the getter, and re-collect dependencies.
  */
+//! fn get: 1. 为了把 初始化创建的watcher 主动地 挂到对应的Deps里去 2.renderWatcher中启动渲染
 Watcher.prototype.get = function get () {
   pushTarget(this);
   var value;
   var vm = this.vm;
   try {
-    value = this.getter.call(vm, vm);
+    value = this.getter.call(vm, vm); 
+    console.log("--render执行了", value, this.getter);
   } catch (e) {
     if (this.user) {
       handleError(e, vm, ("getter for watcher \"" + (this.expression) + "\""));
@@ -4615,6 +4620,7 @@ Watcher.prototype.teardown = function teardown () {
 
 /*  */
 
+//! props,data,computed代理到vm上的 [通用写法]
 var sharedPropertyDefinition = {
   enumerable: true,
   configurable: true,
@@ -4632,22 +4638,25 @@ function proxy (target, sourceKey, key) {
   Object.defineProperty(target, key, sharedPropertyDefinition);
 }
 
+//*0. 实例初始化动作 开始
 function initState (vm) {
-  vm._watchers = [];
+  vm._watchers = [];  //*0-1 key: 每个实例自身都会有 vm._watchers 属性用以 存储所有相关的 '响应式监听'
+                     //* vm(某个组件-单文本组件也算)上「所有的Watcher」都会存储到这里进行管理
   var opts = vm.$options;
-  if (opts.props) { initProps(vm, opts.props); }
-  if (opts.methods) { initMethods(vm, opts.methods); }
+  if (opts.props) { initProps(vm, opts.props); } //* vm.props
+  if (opts.methods) { initMethods(vm, opts.methods); } //* vm.methods
   if (opts.data) {
-    initData(vm);
+    initData(vm); //* vm.data
   } else {
-    observe(vm._data = {}, true /* asRootData */);
+    observe(vm._data = {}, true /* asRootData */); //TODO 应该是处理：已继承后的子组件
   }
-  if (opts.computed) { initComputed(vm, opts.computed); }
-  if (opts.watch && opts.watch !== nativeWatch) {
-    initWatch(vm, opts.watch);
+  if (opts.computed) { initComputed(vm, opts.computed); } //* vm.computed
+  if (opts.watch && opts.watch !== nativeWatch) { 
+    initWatch(vm, opts.watch); //* vm.watch
   }
 }
 
+//*1. 
 function initProps (vm, propsOptions) {
   var propsData = vm.$options.propsData || {};
   var props = vm._props = {};
@@ -4672,7 +4681,7 @@ function initProps (vm, propsOptions) {
           vm
         );
       }
-      defineReactive$$1(props, key, value, function () {
+      defineReactive(props, key, value, function () {
         if (!isRoot && !isUpdatingChildComponent) {
           warn(
             "Avoid mutating a prop directly since the value will be " +
@@ -4687,6 +4696,7 @@ function initProps (vm, propsOptions) {
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
     // instantiation here.
+    // 在Vue.extend（）期间,静态props已经在组件的原型上代理。在这里实例化时,我们只需要代理已定义的props
     if (!(key in vm)) {
       proxy(vm, "_props", key);
     }
@@ -4696,14 +4706,15 @@ function initProps (vm, propsOptions) {
   toggleObserving(true);
 }
 
+//*3. key: 初始化data : []
 function initData (vm) {
   var data = vm.$options.data;
   data = vm._data = typeof data === 'function'
-    ? getData(data, vm)
+    ? getData(data, vm)                                //! 把options.data取出来「多存几处」
     : data || {};
   if (!isPlainObject(data)) {
     data = {};
-    warn(
+     warn(
       'data functions should return an object:\n' +
       'https://vuejs.org/v2/guide/components.html#data-Must-Be-a-Function',
       vm
@@ -4725,32 +4736,33 @@ function initData (vm) {
       }
     }
     if (props && hasOwn(props, key)) {
-      warn(
+       warn(
         "The data property \"" + key + "\" is already declared as a prop. " +
         "Use prop default value instead.",
         vm
       );
     } else if (!isReserved(key)) {
-      proxy(vm, "_data", key);
+      proxy(vm, "_data", key); //? key: 数据代理[将options.data => this._data => this.data => this.xxx]
     }
   }
   // observe data
-  observe(data, true /* asRootData */);
+  observe(data, true /* asRootData */); //? key: 框架核心: 响应式系统的构建开始 ===>
 }
 
 function getData (data, vm) {
   // #7573 disable dep collection when invoking data getters
-  pushTarget();
+  pushTarget(); //TODO ? think: 和依赖收集有关的操作: 像是后期在缺陷中修改的？
   try {
-    return data.call(vm, vm)
+    return data.call(vm, vm) //* 等价于 执行了 return vm.data(vm); 所以data也会是一个函数呢!
   } catch (e) {
     handleError(e, vm, "data()");
     return {}
   } finally {
-    popTarget();
+    popTarget(); //TODO ? think: 和依赖收集有关的操作: 
   }
 }
 
+//*4.
 var computedWatcherOptions = { lazy: true };
 
 function initComputed (vm, computed) {
@@ -4762,7 +4774,7 @@ function initComputed (vm, computed) {
   for (var key in computed) {
     var userDef = computed[key];
     var getter = typeof userDef === 'function' ? userDef : userDef.get;
-    if (getter == null) {
+    if ( getter == null) {
       warn(
         ("Getter is missing for computed property \"" + key + "\"."),
         vm
@@ -4815,7 +4827,8 @@ function defineComputed (
       : noop;
     sharedPropertyDefinition.set = userDef.set || noop;
   }
-  if (sharedPropertyDefinition.set === noop) {
+  if (
+      sharedPropertyDefinition.set === noop) {
     sharedPropertyDefinition.set = function () {
       warn(
         ("Computed property \"" + key + "\" was assigned to but it has no setter."),
@@ -4847,6 +4860,7 @@ function createGetterInvoker(fn) {
   }
 }
 
+//*2. 
 function initMethods (vm, methods) {
   var props = vm.$options.props;
   for (var key in methods) {
@@ -4875,6 +4889,7 @@ function initMethods (vm, methods) {
   }
 }
 
+//*5. 
 function initWatch (vm, watch) {
   for (var key in watch) {
     var handler = watch[key];
@@ -4904,6 +4919,7 @@ function createWatcher (
   return vm.$watch(expOrFn, handler, options)
 }
 
+// 构造函数创建时混入函数
 function stateMixin (Vue) {
   // flow somehow has problems with directly declared definition object
   // when using Object.defineProperty, so we have to procedurally build up
@@ -4924,8 +4940,15 @@ function stateMixin (Vue) {
       warn("$props is readonly.", this);
     };
   }
-  Object.defineProperty(Vue.prototype, '$data', dataDef);
+  /*
+  * 注意下面这种在原型上定义属性的写法:
+  * 此时的 $data、$props 虽然是定义在构造函数的原型上，
+  * 但是在实例化时，该属性会「直接创建一份到实例化对象」上!!!! (vm.$data、vm.$props)
+  ! 实例化时做了什么事，Object.defineProperty的某种特性？
+  */ 
+  Object.defineProperty(Vue.prototype, '$data', dataDef); //* 就是 this.$data => this._data 
   Object.defineProperty(Vue.prototype, '$props', propsDef);
+  // Object.defineProperty(Vue.prototype, '$ddddd', propsDef)
 
   Vue.prototype.$set = set;
   Vue.prototype.$delete = del;
@@ -4954,19 +4977,25 @@ function stateMixin (Vue) {
   };
 }
 
+
+/*
+  思考：
+    1. state相关的初始化顺序有什么影响？ 各state相关的属性有没有优先级？ 提示和冲突是怎么解决的？
+*/
+
 /*  */
 
-var uid$3 = 0;
+var uid$2 = 0;
 
 function initMixin (Vue) {
   Vue.prototype._init = function (options) {
-    var vm = this;
-    // a uid
-    vm._uid = uid$3++;
+    var vm = this; //key: this 在 new Vue() 之后, 已经指代当前解析的实例对象了 「对象引用」
+    // a uid 标记组件实例的个数(标识)
+    vm._uid = uid$2++;
 
     var startTag, endTag;
     /* istanbul ignore if */
-    if (config.performance && mark) {
+    if ( config.performance && mark) {
       startTag = "vue-perf-start:" + (vm._uid);
       endTag = "vue-perf-end:" + (vm._uid);
       mark(startTag);
@@ -4975,12 +5004,16 @@ function initMixin (Vue) {
     // a flag to avoid this being observed
     vm._isVue = true;
     // merge options
+    //? options._isComponent的作用？  => 暂时只需要知道我们自己开发的时候使用的组件，都不是 _isComponent
     if (options && options._isComponent) {
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
       initInternalComponent(vm, options);
     } else {
+      //key：mergeOptions主要做了一个关于 vm.$options的合并操作 
+      //* 把构造函数[对象]上的options和创建组件传入的options合并在一起了 => 「组件实例上直接具有了全局某些属性，即全局directives之类的可以直接用了」
+      //key: 因为全局的属性和方法是作为构造函数Vue的对象属性存在的，所以实例化的时候，vm自身和原型上都访问不到这些属性;只有Vue.xx能获取到
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),
         options || {},
@@ -4988,28 +5021,34 @@ function initMixin (Vue) {
       );
     }
     /* istanbul ignore else */
+    //key 知道渲染模板的时候上下文就是 vm 也就是 this 
     {
       initProxy(vm);
     }
     // expose real self
-    vm._self = vm;
-    initLifecycle(vm);
-    initEvents(vm);
-    initRender(vm);
-    callHook(vm, 'beforeCreate');
-    initInjections(vm); // resolve injections before data/props
-    initState(vm);
-    initProvide(vm); // resolve provide after data/props
-    callHook(vm, 'created');
+    vm._self = vm;  // 自身持有自身[引用类型哦]
+    initLifecycle(vm); //* 生命周期的初始化工作, 初始化了很多变量。最主要是设置了父子组件间的引用关系「即新增了 $parent/$children 属性/值 来构建」 【Lifecycle】
+    initEvents(vm); //* 注册事件。注意：这里注册的不是自己的，而是父组件的。因为很明显父组件的监听器才会注册到子组件身上     【Event】
+    initRender(vm); //* render执行前的准备工作，并未真的开始执行。比如处理父子继承关系等
+    callHook(vm, 'beforeCreate'); //! 准备工作完成，接下来进入「create」阶段
+    initInjections(vm); // resolve injections before data/props         【inject】
+    initState(vm); //* 「options.props、methods、data、computed、watch」按顺序在这里初始化 
+                  //? [响应式系统]：和数据状态有关的几项，在构建时时有上述执行的[顺序]的 ？ 【reactivity】
+    initProvide(vm); // resolve provide after data/props                【provide】
+    callHook(vm, 'created'); //! 「create」阶段完成
 
-    /* istanbul ignore if */
-    if (config.performance && mark) {
+    /* istanbul ignore if -- 性能数据收集 */
+    if ( config.performance && mark) {
       vm._name = formatComponentName(vm, false);
       mark(endTag);
       measure(("vue " + (vm._name) + " init"), startTag, endTag);
     }
 
+    //* 根据有无el开始mount：显然，vm自身一定有$mount这个方法了
+    //* 由于和 平台 有关, $mount在下述位置添加
+    //? 参看 platforms/web/runtime/index.js 里的操作
     if (vm.$options.el) {
+      console.log(("开始挂载了:实例vm-" + (this._uid)));
       vm.$mount(vm.$options.el);
     }
   };
@@ -5071,19 +5110,24 @@ function resolveModifiedOptions (Ctor) {
   return modified
 }
 
-function Vue (options) {
-  if (!(this instanceof Vue)
+function Vue(options) {
+  if (
+    !(this instanceof Vue)
   ) {
     warn('Vue is a constructor and should be called with the `new` keyword');
   }
-  this._init(options);
+  this._init(options); //key:这里的this在 new Vue()时，会变成 => 实例的上下文
 }
 
-initMixin(Vue);
-stateMixin(Vue);
-eventsMixin(Vue);
-lifecycleMixin(Vue);
-renderMixin(Vue);
+/* 
+* 创建构造函数Vue, 及其上所有将被使用的「全局方法 + 实例方法」
+* Vue.xxx  +  Vue.prototype.xx
+*/
+initMixin(Vue); //* 「实例化启动入口」【会调用下面预挂载的各种属性和方法】：主要添加了 _.init()【fn】
+stateMixin(Vue); //* 主要添加了$data【ud】, $props【ud】;   数据状态方法：$watch【fn】, $set【fn】, $delete【fn】  
+eventsMixin(Vue); //* 主要添加了$on, $off, $once, $emit四个事件方法
+lifecycleMixin(Vue); //* 主要添加了_update, $forceUpdate, $destory三个生命周期相关方法
+renderMixin(Vue); //* 主要添加了$nextTick, _render两个方法和一系列renderHelpers
 
 /*  */
 
@@ -5140,7 +5184,7 @@ function initExtend (Vue) {
     }
 
     var name = extendOptions.name || Super.options.name;
-    if (name) {
+    if ( name) {
       validateComponentName(name);
     }
 
@@ -5223,7 +5267,7 @@ function initAssetRegisters (Vue) {
         return this.options[type + 's'][id]
       } else {
         /* istanbul ignore if */
-        if (type === 'component') {
+        if ( type === 'component') {
           validateComponentName(id);
         }
         if (type === 'component' && isPlainObject(definition)) {
@@ -5426,7 +5470,7 @@ function initGlobalAPI (Vue) {
     warn: warn,
     extend: extend,
     mergeOptions: mergeOptions,
-    defineReactive: defineReactive$$1
+    defineReactive: defineReactive
   };
 
   Vue.set = set;
@@ -5456,7 +5500,8 @@ function initGlobalAPI (Vue) {
   initAssetRegisters(Vue);
 }
 
-initGlobalAPI(Vue);
+initGlobalAPI(Vue); //KEY：可知全局api是组合「Vue构造函数」及其原型上某些方法而产生的...
+                   //* 仅加载一次
 
 Object.defineProperty(Vue.prototype, '$isServer', {
   get: isServerRendering
@@ -5692,7 +5737,7 @@ function query (el) {
   if (typeof el === 'string') {
     var selected = document.querySelector(el);
     if (!selected) {
-      warn(
+       warn(
         'Cannot find element: ' + el
       );
       return document.createElement('div')
@@ -5762,6 +5807,7 @@ function setStyleScope (node, scopeId) {
 }
 
 var nodeOps = /*#__PURE__*/Object.freeze({
+  __proto__: null,
   createElement: createElement$1,
   createElementNS: createElementNS,
   createTextNode: createTextNode,
@@ -5892,13 +5938,13 @@ function createPatchFunction (backend) {
   }
 
   function createRmCb (childElm, listeners) {
-    function remove$$1 () {
-      if (--remove$$1.listeners === 0) {
+    function remove () {
+      if (--remove.listeners === 0) {
         removeNode(childElm);
       }
     }
-    remove$$1.listeners = listeners;
-    return remove$$1
+    remove.listeners = listeners;
+    return remove
   }
 
   function removeNode (el) {
@@ -5909,7 +5955,7 @@ function createPatchFunction (backend) {
     }
   }
 
-  function isUnknownElement$$1 (vnode, inVPre) {
+  function isUnknownElement (vnode, inVPre) {
     return (
       !inVPre &&
       !vnode.ns &&
@@ -5958,7 +6004,7 @@ function createPatchFunction (backend) {
         if (data && data.pre) {
           creatingElmInVPre++;
         }
-        if (isUnknownElement$$1(vnode, creatingElmInVPre)) {
+        if (isUnknownElement(vnode, creatingElmInVPre)) {
           warn(
             'Unknown custom element: <' + tag + '> - did you ' +
             'register the component correctly? For recursive components, ' +
@@ -5982,7 +6028,7 @@ function createPatchFunction (backend) {
         insert(parentElm, vnode.elm, refElm);
       }
 
-      if (data && data.pre) {
+      if ( data && data.pre) {
         creatingElmInVPre--;
       }
     } else if (isTrue(vnode.isComment)) {
@@ -6056,11 +6102,11 @@ function createPatchFunction (backend) {
     insert(parentElm, vnode.elm, refElm);
   }
 
-  function insert (parent, elm, ref$$1) {
+  function insert (parent, elm, ref) {
     if (isDef(parent)) {
-      if (isDef(ref$$1)) {
-        if (nodeOps.parentNode(ref$$1) === parent) {
-          nodeOps.insertBefore(parent, elm, ref$$1);
+      if (isDef(ref)) {
+        if (nodeOps.parentNode(ref) === parent) {
+          nodeOps.insertBefore(parent, elm, ref);
         }
       } else {
         nodeOps.appendChild(parent, elm);
@@ -6416,7 +6462,8 @@ function createPatchFunction (backend) {
           if (isDef(i = data) && isDef(i = i.domProps) && isDef(i = i.innerHTML)) {
             if (i !== elm.innerHTML) {
               /* istanbul ignore if */
-              if (typeof console !== 'undefined' &&
+              if (
+                typeof console !== 'undefined' &&
                 !hydrationBailed
               ) {
                 hydrationBailed = true;
@@ -6441,7 +6488,8 @@ function createPatchFunction (backend) {
             // longer than the virtual children list.
             if (!childrenMatch || childNode) {
               /* istanbul ignore if */
-              if (typeof console !== 'undefined' &&
+              if (
+                typeof console !== 'undefined' &&
                 !hydrationBailed
               ) {
                 hydrationBailed = true;
@@ -6476,7 +6524,7 @@ function createPatchFunction (backend) {
   function assertNodeMatch (node, vnode, inVPre) {
     if (isDef(vnode.tag)) {
       return vnode.tag.indexOf('vue-component') === 0 || (
-        !isUnknownElement$$1(vnode, inVPre) &&
+        !isUnknownElement(vnode, inVPre) &&
         vnode.tag.toLowerCase() === (node.tagName && node.tagName.toLowerCase())
       )
     } else {
@@ -6850,12 +6898,6 @@ var klass = {
   create: updateClass,
   update: updateClass
 };
-
-/*  */
-
-/*  */
-
-/*  */
 
 /*  */
 
@@ -7320,20 +7362,20 @@ function removeClass (el, cls) {
 
 /*  */
 
-function resolveTransition (def$$1) {
-  if (!def$$1) {
+function resolveTransition (def) {
+  if (!def) {
     return
   }
   /* istanbul ignore else */
-  if (typeof def$$1 === 'object') {
+  if (typeof def === 'object') {
     var res = {};
-    if (def$$1.css !== false) {
-      extend(res, autoCssTransition(def$$1.name || 'v'));
+    if (def.css !== false) {
+      extend(res, autoCssTransition(def.name || 'v'));
     }
-    extend(res, def$$1);
+    extend(res, def);
     return res
-  } else if (typeof def$$1 === 'string') {
-    return autoCssTransition(def$$1)
+  } else if (typeof def === 'string') {
+    return autoCssTransition(def)
   }
 }
 
@@ -7588,7 +7630,7 @@ function enter (vnode, toggleDisplay) {
       : duration
   );
 
-  if (explicitEnterDuration != null) {
+  if ( explicitEnterDuration != null) {
     checkDuration(explicitEnterDuration, 'enter', vnode);
   }
 
@@ -7696,7 +7738,7 @@ function leave (vnode, rm) {
       : duration
   );
 
-  if (isDef(explicitLeaveDuration)) {
+  if ( isDef(explicitLeaveDuration)) {
     checkDuration(explicitLeaveDuration, 'leave', vnode);
   }
 
@@ -7813,7 +7855,7 @@ function _enter (_, vnode) {
 var transition = inBrowser ? {
   create: _enter,
   activate: _enter,
-  remove: function remove$$1 (vnode, rm) {
+  remove: function remove (vnode, rm) {
     /* istanbul ignore else */
     if (vnode.data.show !== true) {
       leave(vnode, rm);
@@ -7923,7 +7965,7 @@ function actuallySetSelected (el, binding, vm) {
   var value = binding.value;
   var isMultiple = el.multiple;
   if (isMultiple && !Array.isArray(value)) {
-    warn(
+     warn(
       "<select multiple v-model=\"" + (binding.expression) + "\"> " +
       "expects an Array value for its binding, but got " + (Object.prototype.toString.call(value).slice(8, -1)),
       vm
@@ -7993,10 +8035,10 @@ var show = {
     var value = ref.value;
 
     vnode = locateNode(vnode);
-    var transition$$1 = vnode.data && vnode.data.transition;
+    var transition = vnode.data && vnode.data.transition;
     var originalDisplay = el.__vOriginalDisplay =
       el.style.display === 'none' ? '' : el.style.display;
-    if (value && transition$$1) {
+    if (value && transition) {
       vnode.data.show = true;
       enter(vnode, function () {
         el.style.display = originalDisplay;
@@ -8013,8 +8055,8 @@ var show = {
     /* istanbul ignore if */
     if (!value === !oldValue) { return }
     vnode = locateNode(vnode);
-    var transition$$1 = vnode.data && vnode.data.transition;
-    if (transition$$1) {
+    var transition = vnode.data && vnode.data.transition;
+    if (transition) {
       vnode.data.show = true;
       if (value) {
         enter(vnode, function () {
@@ -8140,7 +8182,7 @@ var Transition = {
     }
 
     // warn multiple elements
-    if (children.length > 1) {
+    if ( children.length > 1) {
       warn(
         '<transition> can only be used on a single element. Use ' +
         '<transition-group> for lists.',
@@ -8151,7 +8193,8 @@ var Transition = {
     var mode = this.mode;
 
     // warn invalid mode
-    if (mode && mode !== 'in-out' && mode !== 'out-in'
+    if (
+      mode && mode !== 'in-out' && mode !== 'out-in'
     ) {
       warn(
         'invalid <transition> mode: ' + mode,
@@ -8428,12 +8471,15 @@ extend(Vue.options.components, platformComponents);
 Vue.prototype.__patch__ = inBrowser ? patch : noop;
 
 // public mount method
+//? 通用的 浏览器端-挂载组件-的方法, 这里没有 ‘模板编译’ 的流程 
+// 内部真正实现挂载的方法
 Vue.prototype.$mount = function (
   el,
   hydrating
 ) {
   el = el && inBrowser ? query(el) : undefined;
-  return mountComponent(this, el, hydrating)
+  console.log(("实例vm-" + (this._uid) + "内部的挂载即将开始"));
+  return mountComponent(this, el, hydrating)    //? 调用mountComponent方法挂载
 };
 
 // devtools global hook
@@ -8450,7 +8496,8 @@ if (inBrowser) {
         );
       }
     }
-    if (config.productionTip !== false &&
+    if (
+      config.productionTip !== false &&
       typeof console !== 'undefined'
     ) {
       console[console.info ? 'info' : 'log'](
@@ -8465,3 +8512,4 @@ if (inBrowser) {
 /*  */
 
 module.exports = Vue;
+/n //# sourceMappingURL=vue.js.map

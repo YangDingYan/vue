@@ -75,6 +75,7 @@ export function initMixin (Vue: Class<Component>) {
     //* 由于和 平台 有关, $mount在下述位置添加
     //? 参看 platforms/web/runtime/index.js 里的操作
     if (vm.$options.el) {
+      console.log(`开始挂载了:实例vm-${this._uid}`)
       vm.$mount(vm.$options.el)
     }
   }

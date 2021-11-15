@@ -66,7 +66,10 @@ export function renderMixin (Vue: Class<Component>) {
     return nextTick(fn, this)
   }
 
+  //*: 实例上用来执行vm.options.render的
   Vue.prototype._render = function (): VNode {
+    console.log(`--实例vm-${this._uid}执行了真正的render=>dom tree`)
+    
     const vm: Component = this
     const { render, _parentVnode } = vm.$options
 

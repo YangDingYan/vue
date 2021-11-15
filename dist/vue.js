@@ -921,7 +921,7 @@
    */
   var Observer = function Observer (value) {
     this.value = value;
-    this.dep = new Dep();
+    this.dep = new Dep(); //todo : 注意这个Dep()有多次实例化的操作？
     this.vmCount = 0;
     def(value, '__ob__', this);
     if (Array.isArray(value)) {
@@ -981,6 +981,7 @@
     }
   }
 
+  //! 这个注释太清晰喽
   /**
    * Attempt to create an observer instance for a value,
    * returns the new observer if successfully observed,
@@ -992,7 +993,7 @@
     }
     var ob;
     if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
-      ob = value.__ob__;
+      ob = value.__ob__; //* 每个成功响应化的对象【key】，都会被挂上 __ob__ 属性，避免多次操作
     } else if (
       shouldObserve &&
       !isServerRendering() &&
@@ -1000,7 +1001,7 @@
       Object.isExtensible(value) &&
       !value._isVue
     ) {
-      ob = new Observer(value);
+      ob = new Observer(value); //? key：这里是核心, 好像就是 基于value【data/】创建一个Observer实例 ？
     }
     if (asRootData && ob) {
       ob.vmCount++;
@@ -3540,7 +3541,10 @@
       return nextTick(fn, this)
     };
 
+    //*: 实例上用来执行vm.options.render的
     Vue.prototype._render = function () {
+      console.log(("--实例vm-" + (this._uid) + "执行了真正的render=>dom tree"));
+      
       var vm = this;
       var ref = vm.$options;
       var render = ref.render;
@@ -4024,6 +4028,7 @@
     };
   }
 
+  //* 用来执行[render => vnode tree => 渲染], 归属于web平台, 在platforms/web/runtime/index.js的$mount上调用
   function mountComponent (
     vm,
     el,
@@ -4050,8 +4055,9 @@
         }
       }
     }
+    //! 生命周期呀: beforeMount
     callHook(vm, 'beforeMount');
-
+     // 定义updateComponent方法，在watch回调时调用
     var updateComponent;
     /* istanbul ignore if */
     if ( config.performance && mark) {
@@ -4073,6 +4079,7 @@
       };
     } else {
       updateComponent = function () {
+        //? render函数渲染成虚拟DOM， 虚拟DOM渲染成真实的DOM
         vm._update(vm._render(), hydrating);
       };
     }
@@ -4080,7 +4087,7 @@
     // we set this to vm._watcher inside the watcher's constructor
     // since the watcher's initial patch may call $forceUpdate (e.g. inside child
     // component's mounted hook), which relies on vm._watcher being already defined
-    new Watcher(vm, updateComponent, noop, {
+    var a = new Watcher(vm, updateComponent, noop, {
       before: function before () {
         if (vm._isMounted && !vm._isDestroyed) {
           callHook(vm, 'beforeUpdate');
@@ -4089,6 +4096,7 @@
     }, true /* isRenderWatcher */);
     hydrating = false;
 
+    console.log(("实例vm-" + (vm._uid) + "上创建了renderWatchr: 它一创建好, 就执行了"), a);
     // manually mounted instance, call mounted on self
     // mounted is called for render-created child components in its inserted hook
     if (vm.$vnode == null) {
@@ -4427,11 +4435,11 @@
    * This is used for both the $watch() api and directives.
    */
   var Watcher = function Watcher (
-    vm,
-    expOrFn,
-    cb,
+    vm,                //* 该watcher实例归属于的 vm实例 
+    expOrFn,   //! 可能是'data.a.b'的watcher[用户Watcher] + [computedWatcher + renderWatcher] 
+    cb,                 //!
     options,
-    isRenderWatcher
+    isRenderWatcher     //* 当前是否为renderWatcher
   ) {
     this.vm = vm;
     if (isRenderWatcher) {
@@ -4458,9 +4466,9 @@
     this.newDepIds = new _Set();
     this.expression =  expOrFn.toString()
       ;
-    // parse expression for getter
+    //! parse expression for getter
     if (typeof expOrFn === 'function') {
-      this.getter = expOrFn;
+      this.getter = expOrFn;            //* renderWatcher中, 此处为 渲染流程:() => { vm._update(vm._render(), hydrating) }
     } else {
       this.getter = parsePath(expOrFn);
       if (!this.getter) {
@@ -4481,12 +4489,14 @@
   /**
    * Evaluate the getter, and re-collect dependencies.
    */
+  //! fn get: 1. 为了把 初始化创建的watcher 主动地 挂到对应的Deps里去 2.renderWatcher中启动渲染
   Watcher.prototype.get = function get () {
     pushTarget(this);
     var value;
     var vm = this.vm;
     try {
-      value = this.getter.call(vm, vm);
+      value = this.getter.call(vm, vm); 
+      console.log("--render执行了", value, this.getter);
     } catch (e) {
       if (this.user) {
         handleError(e, vm, ("getter for watcher \"" + (this.expression) + "\""));
@@ -4623,6 +4633,7 @@
 
   /*  */
 
+  //! props,data,computed代理到vm上的 [通用写法]
   var sharedPropertyDefinition = {
     enumerable: true,
     configurable: true,
@@ -4640,22 +4651,25 @@
     Object.defineProperty(target, key, sharedPropertyDefinition);
   }
 
+  //*0. 实例初始化动作 开始
   function initState (vm) {
-    vm._watchers = [];
+    vm._watchers = [];  //*0-1 key: 每个实例自身都会有 vm._watchers 属性用以 存储所有相关的 '响应式监听'
+                       //* vm(某个组件-单文本组件也算)上「所有的Watcher」都会存储到这里进行管理
     var opts = vm.$options;
-    if (opts.props) { initProps(vm, opts.props); }
-    if (opts.methods) { initMethods(vm, opts.methods); }
+    if (opts.props) { initProps(vm, opts.props); } //* vm.props
+    if (opts.methods) { initMethods(vm, opts.methods); } //* vm.methods
     if (opts.data) {
-      initData(vm);
+      initData(vm); //* vm.data
     } else {
-      observe(vm._data = {}, true /* asRootData */);
+      observe(vm._data = {}, true /* asRootData */); //TODO 应该是处理：已继承后的子组件
     }
-    if (opts.computed) { initComputed(vm, opts.computed); }
-    if (opts.watch && opts.watch !== nativeWatch) {
-      initWatch(vm, opts.watch);
+    if (opts.computed) { initComputed(vm, opts.computed); } //* vm.computed
+    if (opts.watch && opts.watch !== nativeWatch) { 
+      initWatch(vm, opts.watch); //* vm.watch
     }
   }
 
+  //*1. 
   function initProps (vm, propsOptions) {
     var propsData = vm.$options.propsData || {};
     var props = vm._props = {};
@@ -4695,6 +4709,7 @@
       // static props are already proxied on the component's prototype
       // during Vue.extend(). We only need to proxy props defined at
       // instantiation here.
+      // 在Vue.extend（）期间,静态props已经在组件的原型上代理。在这里实例化时,我们只需要代理已定义的props
       if (!(key in vm)) {
         proxy(vm, "_props", key);
       }
@@ -4704,10 +4719,11 @@
     toggleObserving(true);
   }
 
+  //*3. key: 初始化data : []
   function initData (vm) {
     var data = vm.$options.data;
     data = vm._data = typeof data === 'function'
-      ? getData(data, vm)
+      ? getData(data, vm)                                //! 把options.data取出来「多存几处」
       : data || {};
     if (!isPlainObject(data)) {
       data = {};
@@ -4739,26 +4755,27 @@
           vm
         );
       } else if (!isReserved(key)) {
-        proxy(vm, "_data", key);
+        proxy(vm, "_data", key); //? key: 数据代理[将options.data => this._data => this.data => this.xxx]
       }
     }
     // observe data
-    observe(data, true /* asRootData */);
+    observe(data, true /* asRootData */); //? key: 框架核心: 响应式系统的构建开始 ===>
   }
 
   function getData (data, vm) {
     // #7573 disable dep collection when invoking data getters
-    pushTarget();
+    pushTarget(); //TODO ? think: 和依赖收集有关的操作: 像是后期在缺陷中修改的？
     try {
-      return data.call(vm, vm)
+      return data.call(vm, vm) //* 等价于 执行了 return vm.data(vm); 所以data也会是一个函数呢!
     } catch (e) {
       handleError(e, vm, "data()");
       return {}
     } finally {
-      popTarget();
+      popTarget(); //TODO ? think: 和依赖收集有关的操作: 
     }
   }
 
+  //*4.
   var computedWatcherOptions = { lazy: true };
 
   function initComputed (vm, computed) {
@@ -4856,6 +4873,7 @@
     }
   }
 
+  //*2. 
   function initMethods (vm, methods) {
     var props = vm.$options.props;
     for (var key in methods) {
@@ -4884,6 +4902,7 @@
     }
   }
 
+  //*5. 
   function initWatch (vm, watch) {
     for (var key in watch) {
       var handler = watch[key];
@@ -4913,6 +4932,7 @@
     return vm.$watch(expOrFn, handler, options)
   }
 
+  // 构造函数创建时混入函数
   function stateMixin (Vue) {
     // flow somehow has problems with directly declared definition object
     // when using Object.defineProperty, so we have to procedurally build up
@@ -4939,7 +4959,7 @@
     * 但是在实例化时，该属性会「直接创建一份到实例化对象」上!!!! (vm.$data、vm.$props)
     ! 实例化时做了什么事，Object.defineProperty的某种特性？
     */ 
-    Object.defineProperty(Vue.prototype, '$data', dataDef);
+    Object.defineProperty(Vue.prototype, '$data', dataDef); //* 就是 this.$data => this._data 
     Object.defineProperty(Vue.prototype, '$props', propsDef);
     // Object.defineProperty(Vue.prototype, '$ddddd', propsDef)
 
@@ -4969,6 +4989,12 @@
       }
     };
   }
+
+
+  /*
+    思考：
+      1. state相关的初始化顺序有什么影响？ 各state相关的属性有没有优先级？ 提示和冲突是怎么解决的？
+  */
 
   /*  */
 
@@ -5000,7 +5026,7 @@
       } else {
         //key：mergeOptions主要做了一个关于 vm.$options的合并操作 
         //* 把构造函数[对象]上的options和创建组件传入的options合并在一起了 => 「组件实例上直接具有了全局某些属性，即全局directives之类的可以直接用了」
-        //key: 因为全局的属性和方法是作为构造函数Vue的独立对象属性存在的，所以实例化的时候，vm自身和原型上都访问不到这些属性
+        //key: 因为全局的属性和方法是作为构造函数Vue的对象属性存在的，所以实例化的时候，vm自身和原型上都访问不到这些属性;只有Vue.xx能获取到
         vm.$options = mergeOptions(
           resolveConstructorOptions(vm.constructor),
           options || {},
@@ -5015,7 +5041,7 @@
       // expose real self
       vm._self = vm;  // 自身持有自身[引用类型哦]
       initLifecycle(vm); //* 生命周期的初始化工作, 初始化了很多变量。最主要是设置了父子组件间的引用关系「即新增了 $parent/$children 属性/值 来构建」 【Lifecycle】
-      initEvents(vm); //* 注册事件。注意：这里注册的不是自己的，而是父组件的。因为很明显父组件的监听器才会注册到子组件身上      【Event】
+      initEvents(vm); //* 注册事件。注意：这里注册的不是自己的，而是父组件的。因为很明显父组件的监听器才会注册到子组件身上     【Event】
       initRender(vm); //* render执行前的准备工作，并未真的开始执行。比如处理父子继承关系等
       callHook(vm, 'beforeCreate'); //! 准备工作完成，接下来进入「create」阶段
       initInjections(vm); // resolve injections before data/props         【inject】
@@ -5032,8 +5058,10 @@
       }
 
       //* 根据有无el开始mount：显然，vm自身一定有$mount这个方法了
+      //* 由于和 平台 有关, $mount在下述位置添加
       //? 参看 platforms/web/runtime/index.js 里的操作
       if (vm.$options.el) {
+        console.log(("开始挂载了:实例vm-" + (this._uid)));
         vm.$mount(vm.$options.el);
       }
     };
@@ -5095,24 +5123,24 @@
     return modified
   }
 
-  function Vue (options) {
+  function Vue(options) {
     if (
       !(this instanceof Vue)
     ) {
       warn('Vue is a constructor and should be called with the `new` keyword');
     }
-    this._init(options); //key:这里的this在 new Vue()时，会变成 实例的上下文
+    this._init(options); //key:这里的this在 new Vue()时，会变成 => 实例的上下文
   }
 
   /* 
   * 创建构造函数Vue, 及其上所有将被使用的「全局方法 + 实例方法」
-  * Vue.xxx  +  Vue.propotype.xx
+  * Vue.xxx  +  Vue.prototype.xx
   */
   initMixin(Vue); //* 「实例化启动入口」【会调用下面预挂载的各种属性和方法】：主要添加了 _.init()【fn】
   stateMixin(Vue); //* 主要添加了$data【ud】, $props【ud】;   数据状态方法：$watch【fn】, $set【fn】, $delete【fn】  
-  eventsMixin(Vue); // 
-  lifecycleMixin(Vue);
-  renderMixin(Vue);
+  eventsMixin(Vue); //* 主要添加了$on, $off, $once, $emit四个事件方法
+  lifecycleMixin(Vue); //* 主要添加了_update, $forceUpdate, $destory三个生命周期相关方法
+  renderMixin(Vue); //* 主要添加了$nextTick, _render两个方法和一系列renderHelpers
 
   /*  */
 
@@ -5485,7 +5513,8 @@
     initAssetRegisters(Vue);
   }
 
-  initGlobalAPI(Vue);
+  initGlobalAPI(Vue); //KEY：可知全局api是组合「Vue构造函数」及其原型上某些方法而产生的...
+                     //* 仅加载一次
 
   Object.defineProperty(Vue.prototype, '$isServer', {
     get: isServerRendering
@@ -9100,12 +9129,15 @@
   Vue.prototype.__patch__ = inBrowser ? patch : noop;
 
   // public mount method
+  //? 通用的 浏览器端-挂载组件-的方法, 这里没有 ‘模板编译’ 的流程 
+  // 内部真正实现挂载的方法
   Vue.prototype.$mount = function (
     el,
     hydrating
   ) {
     el = el && inBrowser ? query(el) : undefined;
-    return mountComponent(this, el, hydrating)
+    console.log(("实例vm-" + (this._uid) + "内部的挂载即将开始"));
+    return mountComponent(this, el, hydrating)    //? 调用mountComponent方法挂载
   };
 
   // devtools global hook
@@ -11951,6 +11983,7 @@
     return el && el.innerHTML
   });
 
+  //? 重新定义$mount,为包含编译器和不包含编译器的版本提供不同封装，最终调用的是缓存原型上的$mount方法
   var mount = Vue.prototype.$mount;
   Vue.prototype.$mount = function (
     el,
@@ -11959,6 +11992,7 @@
     el = el && query(el);
 
     /* istanbul ignore if */
+    //! 确定挂载的DOM元素,这个DOM需要保证不能为html，body这类根节点
     if (el === document.body || el === document.documentElement) {
        warn(
         "Do not mount Vue to <html> or <body> - mount to normal elements instead."
@@ -11968,10 +12002,14 @@
 
     var options = this.$options;
     // resolve template/el and convert to render function
+    //? 需要编译 or 不需要编译
+    //? render选项不存在，代表是template模板的形式，此时需要进行模板的编译过程
     if (!options.render) {
       var template = options.template;
       if (template) {
+        //* 针对[字符串模板]和[选择符]匹配模板
         if (typeof template === 'string') {
+          //* 选择符匹配模板，以'#'为前缀的选择器
           if (template.charAt(0) === '#') {
             template = idToTemplate(template);
             /* istanbul ignore if */
@@ -11982,7 +12020,8 @@
               );
             }
           }
-        } else if (template.nodeType) {
+        } else if (template.nodeType) { //* 元素节点型 
+          //* 把指定挂载节点下的子html字符串取出: innerHTML属性设置或返回表格行的开始和结束标签之间的HTML
           template = template.innerHTML;
         } else {
           {
@@ -11990,15 +12029,18 @@
           }
           return this
         }
-      } else if (el) {
+      } else if (el) { //* 如果没有传入template模板，则默认以el元素所属的根节点作为基础模板
+        //? 这种情况最多了
         template = getOuterHTML(el);
       }
+      //? 在此之前，是对template合法性校验 => 旨在构造形式成 options.template = '<div>...</div>' [一定是该形式]
+      //! 开始-模板编译
       if (template) {
         /* istanbul ignore if */
         if ( config.performance && mark) {
           mark('compile');
         }
-
+        //? 源码中对 编译器 的设计挺复杂的
         var ref = compileToFunctions(template, {
           outputSourceRange: "development" !== 'production',
           shouldDecodeNewlines: shouldDecodeNewlines,
@@ -12008,7 +12050,7 @@
         }, this);
         var render = ref.render;
         var staticRenderFns = ref.staticRenderFns;
-        options.render = render;
+        options.render = render; //* 这时实例上真实的render函数
         options.staticRenderFns = staticRenderFns;
 
         /* istanbul ignore if */
@@ -12018,6 +12060,10 @@
         }
       }
     }
+    //! 挂载DOM => Tree上
+    //? 无论是template模板还是手写render函数最终调用缓存的$mount方法
+    //* 用当前活跃的 vm对象this 来执行挂载 ==> 其实就是挂载当前的实例
+    console.log(("实例vm-" + (this._uid) + "的render已获得，开始真正的mount"), this.$options.render);
     return mount.call(this, el, hydrating)
   };
 
@@ -12025,8 +12071,10 @@
    * Get outerHTML of elements, taking care
    * of SVG elements in IE as well.
    */
-  function getOuterHTML (el) {
+  //* 当vm里没有template属性时, 默认使用el => template位置, 从这里获取.
+  function getOuterHTML(el) {
     if (el.outerHTML) {
+      // outerHTML属性获取描述元素（包括其后代）的【序列化HTML片段】。它也可以设置为用从给定字符串解析的节点替换元素
       return el.outerHTML
     } else {
       var container = document.createElement('div');
@@ -12036,6 +12084,15 @@
   }
 
   Vue.compile = compileToFunctions;
+
+  /*
+  1. innerHTML 和 outerHTML有什么区别
+  （1）innerHTML:
+    从对象的起始位置到终止位置的全部内容, [不包括]HTML标签。
+  （2）outerHTML:
+    除了包含innerHTML的全部内容外, [还包含]对象标签本身。
+  2.
+  */
 
   return Vue;
 

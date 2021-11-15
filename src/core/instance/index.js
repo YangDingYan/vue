@@ -11,7 +11,7 @@ function Vue(options) {
   ) {
     warn('Vue is a constructor and should be called with the `new` keyword')
   }
-  this._init(options) //key:这里的this在 new Vue()时，会变成 实例的上下文
+  this._init(options) //key:这里的this在 new Vue()时，会变成 => 实例的上下文
 }
 
 /* 

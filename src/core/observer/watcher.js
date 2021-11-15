@@ -31,7 +31,7 @@ export default class Watcher {
   id: number;
   deep: boolean;
   user: boolean;
-  lazy: boolean;
+  lazy: boolean;                    //* computed watcher
   sync: boolean;
   dirty: boolean;
   active: boolean;
@@ -45,7 +45,7 @@ export default class Watcher {
 
   constructor (
     vm: Component,                  //* 该watcher实例归属于的 vm实例 
-    expOrFn: string | Function,     //! 可能是'data.a.b'的watcher + 可执行的函数型watcher [computed + renderWatcher] 
+    expOrFn: string | Function,     //! 可能是'data.a.b'的watcher[用户Watcher] + [computedWatcher + renderWatcher] 
     cb: Function,                   //!
     options?: ?Object,
     isRenderWatcher?: boolean       //* 当前是否为renderWatcher
@@ -106,6 +106,7 @@ export default class Watcher {
     const vm = this.vm
     try {
       value = this.getter.call(vm, vm) 
+      console.log(`--render执行了`, value, this.getter)
     } catch (e) {
       if (this.user) {
         handleError(e, vm, `getter for watcher "${this.expression}"`)
