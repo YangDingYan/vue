@@ -68,7 +68,7 @@ export default class Watcher {
     this.cb = cb
     this.id = ++uid // uid for batching
     this.active = true
-    this.dirty = this.lazy // for lazy watchers
+    this.dirty = this.lazy // for lazy watchers 
     this.deps = []
     this.newDeps = []
     this.depIds = new Set()
@@ -78,7 +78,8 @@ export default class Watcher {
       : ''
     //! parse expression for getter
     if (typeof expOrFn === 'function') {
-      this.getter = expOrFn              //* renderWatcher中, 此处为 渲染流程:() => { vm._update(vm._render(), hydrating) }
+      //key: renderWatcher中, 此处this.getter = 渲染流程:() => { vm._update(vm._render(), hydrating) };
+      this.getter = expOrFn              
     } else {
       this.getter = parsePath(expOrFn)
       if (!this.getter) {
@@ -100,13 +101,14 @@ export default class Watcher {
    * Evaluate the getter, and re-collect dependencies.
    */
   //! fn get: 1. 为了把 初始化创建的watcher 主动地 挂到对应的Deps里去   2.renderWatcher中启动渲染
+  //!         3. watcher被通知时, 执行‘依赖’,其实是构建时的可执行函数
   get () {
-    pushTarget(this)
+    pushTarget(this) //* 把当前执行环境的watcher实例, 挂载给Dep.target => 这样在此时的执勤上下文中，所需要创建的dep实例
     let value
     const vm = this.vm
     try {
-      value = this.getter.call(vm, vm) 
-      console.log(`--render执行了`, value, this.getter)
+      value = this.getter.call(vm, vm)
+      console.log(`--实例vm-${vm._uid}的render执行了`, vm, this.getter, value)
     } catch (e) {
       if (this.user) {
         handleError(e, vm, `getter for watcher "${this.expression}"`)

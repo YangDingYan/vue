@@ -4028,7 +4028,7 @@
     };
   }
 
-  //* 用来执行[render => vnode tree => 渲染], 归属于web平台, 在platforms/web/runtime/index.js的$mount上调用
+  //! beforeMount + mounted::用来执行[render => vnode tree => 渲染], 归属于web平台, 在platforms/web/runtime/index.js的$mount上调用
   function mountComponent (
     vm,
     el,
@@ -4055,7 +4055,7 @@
         }
       }
     }
-    //! 生命周期呀: beforeMount
+    //* 生命周期呀: beforeMount
     callHook(vm, 'beforeMount');
      // 定义updateComponent方法，在watch回调时调用
     var updateComponent;
@@ -4459,7 +4459,7 @@
     this.cb = cb;
     this.id = ++uid$1; // uid for batching
     this.active = true;
-    this.dirty = this.lazy; // for lazy watchers
+    this.dirty = this.lazy; // for lazy watchers 
     this.deps = [];
     this.newDeps = [];
     this.depIds = new _Set();
@@ -4468,7 +4468,8 @@
       ;
     //! parse expression for getter
     if (typeof expOrFn === 'function') {
-      this.getter = expOrFn;            //* renderWatcher中, 此处为 渲染流程:() => { vm._update(vm._render(), hydrating) }
+      //key: renderWatcher中, 此处this.getter = 渲染流程:() => { vm._update(vm._render(), hydrating) };
+      this.getter = expOrFn;              
     } else {
       this.getter = parsePath(expOrFn);
       if (!this.getter) {
@@ -4490,13 +4491,14 @@
    * Evaluate the getter, and re-collect dependencies.
    */
   //! fn get: 1. 为了把 初始化创建的watcher 主动地 挂到对应的Deps里去 2.renderWatcher中启动渲染
+  //!       3. watcher被通知时, 执行‘依赖’,其实是构建时的可执行函数
   Watcher.prototype.get = function get () {
     pushTarget(this);
     var value;
     var vm = this.vm;
     try {
-      value = this.getter.call(vm, vm); 
-      console.log("--render执行了", value, this.getter);
+      value = this.getter.call(vm, vm);
+      console.log(("--实例vm-" + (vm._uid) + "的render执行了"), vm, this.getter, value);
     } catch (e) {
       if (this.user) {
         handleError(e, vm, ("getter for watcher \"" + (this.expression) + "\""));
