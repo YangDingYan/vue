@@ -67,6 +67,7 @@ function createKeyToOldIdx (children, beginIdx, endIdx) {
   return map
 }
 
+//! 根据backend(后端) 构建 真正的__patch__函数
 export function createPatchFunction (backend) {
   let i, j
   const cbs = {}
@@ -696,7 +697,8 @@ export function createPatchFunction (backend) {
       return node.nodeType === (vnode.isComment ? 8 : 3)
     }
   }
-
+  
+  //! 真正的patch函数看这里哦
   return function patch (oldVnode, vnode, hydrating, removeOnly) {
     if (isUndef(vnode)) {
       if (isDef(oldVnode)) invokeDestroyHook(oldVnode)

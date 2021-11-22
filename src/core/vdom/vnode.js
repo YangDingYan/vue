@@ -1,5 +1,6 @@
 /* @flow */
 
+//* 全量的VNode属性
 export default class VNode {
   tag: string | void;
   data: VNodeData | void;
@@ -71,14 +72,14 @@ export default class VNode {
   }
 }
 
-export const createEmptyVNode = (text: string = '') => {
+export const createEmptyVNode = (text: string = '') => { //* 注释节点
   const node = new VNode()
   node.text = text
   node.isComment = true
   return node
 }
 
-export function createTextVNode (val: string | number) {
+export function createTextVNode (val: string | number) { //* 文本节点
   return new VNode(undefined, undefined, undefined, String(val))
 }
 
@@ -86,7 +87,7 @@ export function createTextVNode (val: string | number) {
 // used for static nodes and slot nodes because they may be reused across
 // multiple renders, cloning them avoids errors when DOM manipulations rely
 // on their elm reference.
-export function cloneVNode (vnode: VNode): VNode {
+export function cloneVNode (vnode: VNode): VNode { //* 克隆节点
   const cloned = new VNode(
     vnode.tag,
     vnode.data,

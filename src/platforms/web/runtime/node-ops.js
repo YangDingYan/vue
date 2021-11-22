@@ -1,5 +1,6 @@
 /* @flow */
-
+//! 抽象定义了 browser中 关于 dom/document的 [真正的操作方法]
+//* 在 './patch.js' 中以 整体对象形式导入 
 import { namespaceMap } from 'web/util/index'
 
 export function createElement (tagName: string, vnode: VNode): Element {

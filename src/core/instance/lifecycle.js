@@ -56,19 +56,31 @@ export function initLifecycle (vm: Component) {
 }
 
 export function lifecycleMixin (Vue: Class<Component>) {
+  //* 在renderWatcher中的执行语法: vm._update(vm._render(), hydrating) => 可见核心: vm.__pathc__
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
-    const prevEl = vm.$el
-    const prevVnode = vm._vnode
+    //! $el属性一定要理解: 此时, $el就是从模板里取到的,是什么就是什么
+    /** 例如：
+     *  vm.$el = <div id="app"><div class="demo">{{ change }}...</div></div>
+     */
+    console.info(`--未上树: 实例vm-${vm._uid}的vm.$el属性是:`, vm.$el)
+    const prevEl = vm.$el //* 理解成根实例节点的挂载位置 => el:'#app'
+    const prevVnode = vm._vnode // prevVnode为旧vnode节点
     const restoreActiveInstance = setActiveInstance(vm)
     vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
+    // 通过是否有旧节点判断是初次渲染还是数据更新
     if (!prevVnode) {
-      // initial render
+      //! initial render : 初始化[渲染] => 执行完就已经上图了
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
+      console.info(`--已上树: 实例vm-${vm._uid}的vm.$el属性是:`, vm.$el)
+      //! $el属性一定要理解: 此时, $el已经是渲染过后的了
+      /** 例如：
+       *  vm.$el = <div id="app"><div class="demo">22222222...</div></div>
+       */
     } else {
-      // updates
+      //! updates : 数据更新
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
     restoreActiveInstance()

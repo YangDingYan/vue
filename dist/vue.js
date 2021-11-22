@@ -764,6 +764,7 @@
 
   /*  */
 
+  //* 全量的VNode属性
   var VNode = function VNode (
     tag,
     data,
@@ -811,14 +812,14 @@
 
   var createEmptyVNode = function (text) {
     if ( text === void 0 ) text = '';
-
+   //* 注释节点
     var node = new VNode();
     node.text = text;
     node.isComment = true;
     return node
   };
 
-  function createTextVNode (val) {
+  function createTextVNode (val) { //* 文本节点
     return new VNode(undefined, undefined, undefined, String(val))
   }
 
@@ -826,7 +827,7 @@
   // used for static nodes and slot nodes because they may be reused across
   // multiple renders, cloning them avoids errors when DOM manipulations rely
   // on their elm reference.
-  function cloneVNode (vnode) {
+  function cloneVNode (vnode) { //* 克隆节点
     var cloned = new VNode(
       vnode.tag,
       vnode.data,
@@ -3946,19 +3947,24 @@
   }
 
   function lifecycleMixin (Vue) {
+    //* 在renderWatcher中的执行语法: vm._update(vm._render(), hydrating) => 可见核心: vm.__pathc__
     Vue.prototype._update = function (vnode, hydrating) {
       var vm = this;
-      var prevEl = vm.$el;
-      var prevVnode = vm._vnode;
+      //! $el属性一定要理解
+      console.info(("--未上树: 实例vm-" + (vm._uid) + "的vm.$el属性是:"), vm.$el);
+      var prevEl = vm.$el; //* 理解成根实例节点的挂载位置 => el:'#app'
+      var prevVnode = vm._vnode; // prevVnode为旧vnode节点
       var restoreActiveInstance = setActiveInstance(vm);
       vm._vnode = vnode;
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
+      // 通过是否有旧节点判断是初次渲染还是数据更新
       if (!prevVnode) {
-        // initial render
+        //! initial render : 初始化[渲染] => 执行完就已经上图了
         vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */);
+        console.info(("--已上树: 实例vm-" + (vm._uid) + "的vm.$el属性是:"), vm.$el);
       } else {
-        // updates
+        //! updates : 数据更新
         vm.$el = vm.__patch__(prevVnode, vnode);
       }
       restoreActiveInstance();
@@ -4493,7 +4499,7 @@
   //! fn get: 1. 为了把 初始化创建的watcher 主动地 挂到对应的Deps里去 2.renderWatcher中启动渲染
   //!       3. watcher被通知时, 执行‘依赖’,其实是构建时的可执行函数
   Watcher.prototype.get = function get () {
-    pushTarget(this);
+    pushTarget(this); //* 把当前执行环境的watcher实例, 挂载给Dep.target => 这样在此时的执勤上下文中，所需要创建的dep实例
     var value;
     var vm = this.vm;
     try {
@@ -5934,6 +5940,7 @@
     return map
   }
 
+  //! 根据backend(后端) 构建 真正的__patch__函数
   function createPatchFunction (backend) {
     var i, j;
     var cbs = {};
@@ -6548,7 +6555,8 @@
         return node.nodeType === (vnode.isComment ? 8 : 3)
       }
     }
-
+    
+    //! 真正的patch函数看这里哦
     return function patch (oldVnode, vnode, hydrating, removeOnly) {
       if (isUndef(vnode)) {
         if (isDef(oldVnode)) { invokeDestroyHook(oldVnode); }
@@ -8532,7 +8540,7 @@
     domProps,
     style,
     transition
-  ];
+  ]; //! ==> = platformModules
 
   /*  */
 
@@ -8541,6 +8549,41 @@
   var modules = platformModules.concat(baseModules);
 
   var patch = createPatchFunction({ nodeOps: nodeOps, modules: modules });
+
+
+  /*
+  * ????:: VNode核心中的基础能力：ref + directives
+  baseModules = [
+      ref,
+      directives
+  ]
+
+  !定义了模块的钩子函数
+  platformModules = [
+      attrs,
+      klass,
+      events,
+      domProps,
+      style,
+      transition
+  ]
+
+  !将[真实平台browser]操作dom对象的方法合集
+  nodeOps = {
+      createElement: createElement,
+      createElementNS: createElementNS,
+      createTextNode: createTextNode,
+      createComment: createComment,
+      insertBefore: insertBefore,
+      removeChild: removeChild,
+      appendChild: appendChild,
+      parentNode: parentNode,
+      nextSibling: nextSibling,
+      tagName: tagName,
+      setTextContent: setTextContent,
+      setStyleScope: setStyleScope
+  }
+   */
 
   /**
    * Not type checking this file because flow doesn't like attaching
@@ -9127,7 +9170,7 @@
   extend(Vue.options.directives, platformDirectives);
   extend(Vue.options.components, platformComponents);
 
-  // install platform patch function
+  //! install platform patch function => 平台相关的渲染__patch__方法挂载
   Vue.prototype.__patch__ = inBrowser ? patch : noop;
 
   // public mount method

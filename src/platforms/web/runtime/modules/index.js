@@ -12,4 +12,4 @@ export default [
   domProps,
   style,
   transition
-]
+] //! ==> = platformModules 

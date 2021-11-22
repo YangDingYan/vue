@@ -12,11 +12,16 @@
   </head>
   <body>
     <div id="demo">
-      <h1>Latest Vue.js Commits</h1>
+      <h1>Latest Vue.js Commits{{a}}</h1>
     </div>
     <script>
         const VueCompRoot = new Vue({
-            el: '#demo'
+            el: '#demo',
+            data() {
+              return {
+                a: 1
+              }
+            }
         })
     </script>
   </body>
