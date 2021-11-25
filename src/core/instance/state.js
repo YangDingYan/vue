@@ -47,7 +47,8 @@ export function proxy (target: Object, sourceKey: string, key: string) {
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
-//*0. 实例初始化动作 开始
+//*0. 实例初始化动作 : 开始 
+//! 响应式[系统] 基础工程 初始化搭建
 export function initState (vm: Component) {
   vm._watchers = []  //*0-1 key: 每个实例自身都会有 vm._watchers 属性用以 存储所有相关的 '响应式监听'
                      //* vm(某个组件-单文本组件也算)上「所有的Watcher」都会存储到这里进行管理

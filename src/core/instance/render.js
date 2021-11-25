@@ -92,6 +92,7 @@ export function renderMixin (Vue: Class<Component>) {
       // when parent component is patched.
       currentRenderingInstance = vm
       vnode = render.call(vm._renderProxy, vm.$createElement)
+      console.log('--根实例上成功递归创建完的未改造VNode Tree：', vnode)
     } catch (e) {
       handleError(e, vm, `render`)
       // return error render result,
@@ -127,6 +128,7 @@ export function renderMixin (Vue: Class<Component>) {
     }
     // set parent
     vnode.parent = _parentVnode
+    console.log('--根实例上成功递归创建完的VNode Tree：', vnode)
     return vnode
   }
 }

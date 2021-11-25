@@ -25,7 +25,7 @@ const ALWAYS_NORMALIZE = 2
 
 // wrapper function for providing a more flexible interface
 // without getting yelled at by flow
-export function createElement (
+export function createElement(
   context: Component,
   tag: any,
   data: any,
@@ -33,6 +33,8 @@ export function createElement (
   normalizationType: any,
   alwaysNormalize: boolean
 ): VNode | Array<VNode> {
+  console.log('--createElement参数是个啥:', context, tag, data, children, normalizationType, alwaysNormalize)
+  console.log('--data类型格式化:', Array.isArray(data) || isPrimitive(data))
   if (Array.isArray(data) || isPrimitive(data)) {
     normalizationType = children
     children = data
@@ -44,13 +46,14 @@ export function createElement (
   return _createElement(context, tag, data, children, normalizationType)
 }
 
-export function _createElement (
+export function _createElement(
   context: Component,
   tag?: string | Class<Component> | Function | Object,
   data?: VNodeData,
   children?: any,
   normalizationType?: number
 ): VNode | Array<VNode> {
+  console.log('--_createElement是个啥:', context, tag, data, children, normalizationType)
   if (isDef(data) && isDef((data: any).__ob__)) {
     process.env.NODE_ENV !== 'production' && warn(
       `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
@@ -108,6 +111,9 @@ export function _createElement (
         config.parsePlatformTagName(tag), data, children,
         undefined, undefined, context
       )
+      console.log('--createElement参数：', config.parsePlatformTagName(tag), data, children,
+        undefined, undefined, context)
+      console.log('--createElement结束生成的vnode形式：', vnode)
     } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
       // component
       vnode = createComponent(Ctor, data, context, children, tag)
@@ -135,7 +141,7 @@ export function _createElement (
   }
 }
 
-function applyNS (vnode, ns, force) {
+function applyNS(vnode, ns, force) {
   vnode.ns = ns
   if (vnode.tag === 'foreignObject') {
     // use default namespace inside foreignObject
@@ -156,7 +162,7 @@ function applyNS (vnode, ns, force) {
 // ref #5318
 // necessary to ensure parent re-render when deep bindings like :style and
 // :class are used on slot nodes
-function registerDeepBindings (data) {
+function registerDeepBindings(data) {
   if (isObject(data.style)) {
     traverse(data.style)
   }

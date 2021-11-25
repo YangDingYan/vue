@@ -79,8 +79,11 @@ export default class Watcher {
     //! parse expression for getter
     if (typeof expOrFn === 'function') {
       //key: renderWatcher中, 此处this.getter = 渲染流程:() => { vm._update(vm._render(), hydrating) };
-      this.getter = expOrFn              
+      //key: 自定义的watch, 也是在此处进行内部的获取
+      //key: computed等等
+      this.getter = expOrFn            
     } else {
+      //key: state数据响应式拦截
       this.getter = parsePath(expOrFn)
       if (!this.getter) {
         this.getter = noop
