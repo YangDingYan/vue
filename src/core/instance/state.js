@@ -152,10 +152,11 @@ function initData (vm: Component) {
         vm
       )
     } else if (!isReserved(key)) {
+      //? 仅到这里, this.xx\this.$data.xx 已经能获取到值了. 第一次render没问题的
       proxy(vm, `_data`, key) //? key: 数据代理[将options.data => this._data => this.data => this.xxx]
     }
   }
-  // observe data
+  //* observe data => 为了程序中自动修改[data]时, 能自动地触发render
   observe(data, true /* asRootData */) //? key: 框架核心: 响应式系统的构建开始 ===>
 }
 

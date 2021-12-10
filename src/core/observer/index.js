@@ -41,7 +41,8 @@ export class Observer {
 
   constructor (value: any) {
     this.value = value
-    this.dep = new Dep() //todo : 注意这个Dep()有多次实例化的操作？
+    //! 此处dep属性是在Vue.$set和Vue.$delete中使用的?
+    this.dep = new Dep() //todo : 注意这个Dep()有多次实例化的操作?
     this.vmCount = 0
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
@@ -147,7 +148,7 @@ export function defineReactive (
     return
   }
 
-  // cater for pre-defined getter/setters
+  //! 干嘛用呢 cater for pre-defined getter/setters
   const getter = property && property.get
   const setter = property && property.set
   if ((!getter || setter) && arguments.length === 2) {
@@ -227,6 +228,7 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     return val
   }
   defineReactive(ob.value, key, val)
+  //! 响应化最外层data是创建的observe实例上的dep
   ob.dep.notify()
   return val
 }

@@ -8,20 +8,27 @@
     <!-- virtual dom 渲染的测试 -->
 </head>
 <body>
-    <div id="app"></div>
+    <div id="app">
+        <div>
+            <h3>{{ this.title }}</h3>
+            <h4>{{ this.name }}</h4>
+        </div>
+    </div>
     <script src="../dist/vue.js"></script>
     <script>
+
+
         const app = new Vue({
             el: '#app',
             // template: ''
-            render: function(h) {
-                // 这里h = createElement
-                // return h('h3', this.title)
-                return h('div', [
-                    h('h3', this.title),
-                    h('h4', this.name)
-                ])
-            },
+            // render: function(h) {
+            //     // 这里h = createElement
+            //     // return h('h3', this.title)
+            //     return h('div', [
+            //         h('h3', this.title),
+            //         h('h4', this.name)
+            //     ])
+            // },
             data() {
                 return {
                     title: 'data-VNode Tree上树实现',
