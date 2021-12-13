@@ -922,7 +922,8 @@
    */
   var Observer = function Observer (value) {
     this.value = value;
-    this.dep = new Dep(); //todo : 注意这个Dep()有多次实例化的操作？
+    //! 此处dep属性是在Vue.$set和Vue.$delete中使用的?
+    this.dep = new Dep(); //todo : 注意这个Dep()有多次实例化的操作?
     this.vmCount = 0;
     def(value, '__ob__', this);
     if (Array.isArray(value)) {
@@ -1027,13 +1028,13 @@
       return
     }
 
-    // cater for pre-defined getter/setters
+    //! 干嘛用呢 cater for pre-defined getter/setters
     var getter = property && property.get;
     var setter = property && property.set;
     if ((!getter || setter) && arguments.length === 2) {
       val = obj[key];
     }
-
+    //! 这一部分的逻辑是针对深层次的对象，如果对象的属性是一个对象，则会递归调用实例化Observe类，让其属性值也转换为响应式对象
     var childOb = !shallow && observe(val);
     Object.defineProperty(obj, key, {
       enumerable: true,
@@ -1107,6 +1108,7 @@
       return val
     }
     defineReactive(ob.value, key, val);
+    //! 响应化最外层data是创建的observe实例上的dep
     ob.dep.notify();
     return val
   }
@@ -4785,10 +4787,11 @@
           vm
         );
       } else if (!isReserved(key)) {
+        //? 仅到这里, this.xx\this.$data.xx 已经能获取到值了. 第一次render没问题的
         proxy(vm, "_data", key); //? key: 数据代理[将options.data => this._data => this.data => this.xxx]
       }
     }
-    // observe data
+    //* observe data => 为了程序中自动修改[data]时, 能自动地触发render
     observe(data, true /* asRootData */); //? key: 框架核心: 响应式系统的构建开始 ===>
   }
 
@@ -6591,6 +6594,8 @@
 
     //! patch函数操作看这里哦
     return function patch(oldVnode, vnode, hydrating, removeOnly) {
+      console.log('--实例挂载时，oldVnode/vnode的真实情况：', oldVnode, vnode);
+
       if (isUndef(vnode)) {
         if (isDef(oldVnode)) { invokeDestroyHook(oldVnode); }
         return
@@ -6605,9 +6610,12 @@
         createElm(vnode, insertedVnodeQueue);
       } else {
         var isRealElement = isDef(oldVnode.nodeType);
+        console.log('####--isRealElement:', isRealElement);
+
         if (!isRealElement && sameVnode(oldVnode, vnode)) {
           // patch existing root node
-          // console.log('*****************************')
+          console.log('*************PATCH:新旧节点的对比操作****************');
+          
           patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly);
         } else {
           if (isRealElement) {

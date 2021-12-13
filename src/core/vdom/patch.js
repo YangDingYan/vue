@@ -710,6 +710,8 @@ export function createPatchFunction(backend) {
 
   //! patch函数操作看这里哦
   return function patch(oldVnode, vnode, hydrating, removeOnly) {
+    console.log('--实例挂载时，oldVnode/vnode的真实情况：', oldVnode, vnode)
+
     if (isUndef(vnode)) {
       if (isDef(oldVnode)) invokeDestroyHook(oldVnode)
       return
@@ -724,9 +726,12 @@ export function createPatchFunction(backend) {
       createElm(vnode, insertedVnodeQueue)
     } else {
       const isRealElement = isDef(oldVnode.nodeType)
+      console.log('####--isRealElement:', isRealElement)
+
       if (!isRealElement && sameVnode(oldVnode, vnode)) {
         // patch existing root node
-        // console.log('*****************************')
+        console.log('*************PATCH:新旧节点的对比操作****************')
+        
         patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly)
       } else {
         if (isRealElement) {
