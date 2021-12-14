@@ -210,10 +210,10 @@ export function createPatchFunction(backend) {
         creatingElmInVPre--
       }
     } else if (isTrue(vnode.isComment)) {              //key 注释节点类型
-      console.log('++++++++++++++') 
+      console.log('++++++++++++++')
       vnode.elm = nodeOps.createComment(vnode.text)    //* 创建注释节点
       insert(parentElm, vnode.elm, refElm)             //* 插入到DOM中
-    } else {    
+    } else {
       console.log('***********')                                       //key 文本节点类型
       vnode.elm = nodeOps.createTextNode(vnode.text)   //* 创建文本节点类型
       insert(parentElm, vnode.elm, refElm)             //* 插入到DOM中
@@ -464,13 +464,19 @@ export function createPatchFunction(backend) {
         idxInOld = isDef(newStartVnode.key)
           ? oldKeyToIdx[newStartVnode.key]
           : findIdxInOld(newStartVnode, oldCh, oldStartIdx, oldEndIdx)
-        if (isUndef(idxInOld)) { // New element
+       
+        if (isUndef(idxInOld)) { // New element //* 如果在oldChildren里找不到当前循环的newChildren里的子节点
+          // 新增节点并插入到合适位置
           createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm, false, newCh, newStartIdx)
         } else {
+          // 如果在oldChildren里找到了当前循环的newChildren里的子节点
           vnodeToMove = oldCh[idxInOld]
+          // 如果两个节点相同
           if (sameVnode(vnodeToMove, newStartVnode)) {
+            // 调用patchVnode更新节点
             patchVnode(vnodeToMove, newStartVnode, insertedVnodeQueue, newCh, newStartIdx)
             oldCh[idxInOld] = undefined
+            // canmove表示是否需要移动节点，如果为true表示需要移动，则移动节点，如果为false则不用移动
             canMove && nodeOps.insertBefore(parentElm, vnodeToMove.elm, oldStartVnode.elm)
           } else {
             // same key but different element. treat as new element
@@ -521,6 +527,7 @@ export function createPatchFunction(backend) {
     index,
     removeOnly
   ) {
+    //* vnode与oldVnode是否完全一样？若是，退出程序
     if (oldVnode === vnode) {
       return
     }
@@ -545,6 +552,7 @@ export function createPatchFunction(backend) {
     // note we only do this if the vnode is cloned -
     // if the new node is not cloned it means the render functions have been
     // reset by the hot-reload-api and we need to do a proper re-render.
+    //* vnode与oldVnode是否完全一样？若是，退出程序
     if (isTrue(vnode.isStatic) &&
       isTrue(oldVnode.isStatic) &&
       vnode.key === oldVnode.key &&
@@ -566,21 +574,34 @@ export function createPatchFunction(backend) {
       for (i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
       if (isDef(i = data.hook) && isDef(i = i.update)) i(oldVnode, vnode)
     }
+    //* vnode有text属性？若没有：
     if (isUndef(vnode.text)) {
+      // vnode的子节点与oldVnode的子节点是否都存在？
       if (isDef(oldCh) && isDef(ch)) {
         if (oldCh !== ch) updateChildren(elm, oldCh, ch, insertedVnodeQueue, removeOnly)
       } else if (isDef(ch)) {
+        // 若只有vnode的子节点存在
         if (process.env.NODE_ENV !== 'production') {
           checkDuplicateKeys(ch)
         }
+        /**
+         * 判断oldVnode是否有文本？
+         * 若没有，则把vnode的子节点添加到真实DOM中
+         * 若有，则清空Dom中的文本，再把vnode的子节点添加到真实DOM中
+         */
         if (isDef(oldVnode.text)) nodeOps.setTextContent(elm, '')
         addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue)
       } else if (isDef(oldCh)) {
+        // 若只有oldnode的子节点存在 -- 清空DOM中的子节点
         removeVnodes(oldCh, 0, oldCh.length - 1)
       } else if (isDef(oldVnode.text)) {
+        // 若vnode和oldnode都没有子节点，但是oldnode中有文本 --清空oldnode文本
         nodeOps.setTextContent(elm, '')
       }
+       //! 上面两个判断一句话概括就是，如果vnode中既没有text，也没有子节点，那么对应的oldnode中有什么就清空什么
     } else if (oldVnode.text !== vnode.text) {
+       // 若有，vnode的text属性与oldVnode的text属性是否相同？
+       // 若不相同：则用vnode的text替换真实DOM的文本
       nodeOps.setTextContent(elm, vnode.text)
     }
     if (isDef(data)) {
@@ -735,7 +756,7 @@ export function createPatchFunction(backend) {
       if (!isRealElement && sameVnode(oldVnode, vnode)) {
         // patch existing root node
         console.log('*************PATCH:新旧节点的对比操作****************')
-        
+
         patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly)
       } else {
         if (isRealElement) {

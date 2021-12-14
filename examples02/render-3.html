@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>virtual dom 渲染的测试</title>
+    <!-- virtual dom 渲染的测试 -->
+</head>
+<body>
+    <div id="app"></div>
+    <script src="../dist/vue.js"></script>
+    <script>
+        const app = new Vue({
+            el: '#app',
+            // template: ''
+            render: function(h) {
+                // 这里h = createElement
+                // 这里的this.title会在 h()执行时，进行取值:get => watcher
+            //    return h('h3', this.title)
+            return h('h3', this.title2.name)
+            // return h('div', [
+            //     h('h3', this.title),
+            //     h('h4', this.name)
+            // ])
+            },
+            data() {
+                return {
+                    // title: 'data-VNode Treess上树实现',
+                    title2: {
+                        name: '复合对象型'
+                    }
+                    // name: 'name的get属性测试'
+                }
+            }
+        })
+
+        //* 模拟在程序中, 修改数据 => 依赖-render
+        // setTimeout(() => {
+        //     app.$data.title = '我手动修改title,渲染成功啦'
+        //     console.log('@@@@@@', app)
+        // }, 2000)
+        setTimeout(() => {
+            app.$data.title2.name = '我手动修改title2,渲染成功啦'
+            console.log('@@@@@@', app)
+        }, 2000)
+    </script>
+</body>
+</html>
