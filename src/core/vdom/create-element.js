@@ -100,7 +100,8 @@ export function _createElement(
     let Ctor
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
     if (config.isReservedTag(tag)) {
-      // platform built-in elements
+      //* platform built-in elements : 平台相关的保留标签
+      //* 用来判断标签是否为普通的html标签
       if (process.env.NODE_ENV !== 'production' && isDef(data) && isDef(data.nativeOn) && data.tag !== 'component') {
         warn(
           `The .native modifier for v-on is only valid on components but it was used on <${tag}>.`,
@@ -114,8 +115,9 @@ export function _createElement(
       console.log('--createElement参数：', config.parsePlatformTagName(tag), data, children,
         undefined, undefined, context)
       console.log('--createElement结束生成的vnode形式：', vnode)
+      // context.$options.components[组件名]拿到注册后的组件选项
     } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
-      // component
+      //! 已提前被注册好了: 创建组件节点: component
       vnode = createComponent(Ctor, data, context, children, tag)
     } else {
       // unknown or unlisted namespaced elements
@@ -127,7 +129,7 @@ export function _createElement(
       )
     }
   } else {
-    // direct component options / constructor
+    //! direct component options / constructor
     vnode = createComponent(tag, data, context, children)
   }
   if (Array.isArray(vnode)) {

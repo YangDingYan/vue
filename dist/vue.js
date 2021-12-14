@@ -3135,10 +3135,12 @@
         var mountedNode = vnode; // work around flow
         componentVNodeHooks.prepatch(mountedNode, mountedNode);
       } else {
+        //! 实例化
         var child = vnode.componentInstance = createComponentInstanceForVnode(
           vnode,
           activeInstance
         );
+        //! 挂载
         child.$mount(hydrating ? vnode.elm : undefined, hydrating);
       }
     },
@@ -3189,9 +3191,9 @@
   };
 
   var hooksToMerge = Object.keys(componentVNodeHooks);
-
+  //* 创建组件节点 + 实例
   function createComponent (
-    Ctor,
+    Ctor,  //! 子类构造器 | 子组件的配置对象
     data,
     context,
     children,
@@ -3201,9 +3203,12 @@
       return
     }
 
+    //* Vue.options里的_base属性存储Vue构造器
     var baseCtor = context.$options._base;
 
     // plain options object: turn it into a constructor
+    //* 针对局部组件注册场景
+    //* 局部注册添加的是一个子组件的配置对象，而全局注册添加的是一个子类构造器
     if (isObject(Ctor)) {
       Ctor = baseCtor.extend(Ctor);
     }
@@ -3238,6 +3243,7 @@
 
     data = data || {};
 
+    //* 构造器配置合并
     // resolve constructor options in case global mixins are applied after
     // component constructor creation
     resolveConstructorOptions(Ctor);
@@ -3274,11 +3280,13 @@
       }
     }
 
+    //! 挂载组件钩子
     // install component management hooks onto the placeholder node
     installComponentHooks(data);
 
     // return a placeholder vnode
     var name = Ctor.options.name || tag;
+    //* 创建子组件vnode，名称以 vue-component- 开头
     var vnode = new VNode(
       ("vue-component-" + (Ctor.cid) + (name ? ("-" + name) : '')),
       data, undefined, undefined, undefined, context,
@@ -3435,7 +3443,8 @@
       var Ctor;
       ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag);
       if (config.isReservedTag(tag)) {
-        // platform built-in elements
+        //* platform built-in elements : 平台相关的保留标签
+        //* 用来判断标签是否为普通的html标签
         if ( isDef(data) && isDef(data.nativeOn) && data.tag !== 'component') {
           warn(
             ("The .native modifier for v-on is only valid on components but it was used on <" + tag + ">."),
@@ -3449,8 +3458,9 @@
         console.log('--createElement参数：', config.parsePlatformTagName(tag), data, children,
           undefined, undefined, context);
         console.log('--createElement结束生成的vnode形式：', vnode);
+        // context.$options.components[组件名]拿到注册后的组件选项
       } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
-        // component
+        //! 已提前被注册好了: 创建组件节点: component
         vnode = createComponent(Ctor, data, context, children, tag);
       } else {
         // unknown or unlisted namespaced elements
@@ -3462,7 +3472,7 @@
         );
       }
     } else {
-      // direct component options / constructor
+      //! direct component options / constructor
       vnode = createComponent(tag, data, context, children);
     }
     if (Array.isArray(vnode)) {
@@ -3577,7 +3587,7 @@
         // separately from one another. Nested component's render fns are called
         // when parent component is patched.
         currentRenderingInstance = vm;
-        vnode = render.call(vm._renderProxy, vm.$createElement);
+        vnode = render.call(vm._renderProxy, vm.$createElement); //* 执行 vm.render(vm.$createElement)
         console.log('--根实例上成功递归创建完的未改造VNode Tree：', vnode);
       } catch (e) {
         handleError(e, vm, "render");
@@ -6049,6 +6059,8 @@
       }
 
       vnode.isRootInsert = !nested; // for transition enter check
+      //! 直接先尝试创建：子组件;
+      // 递归创建子组件真实节点,直到完成所有子组件的渲染才进行根节点的真实节点插入
       if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
         return
       }
@@ -6102,9 +6114,11 @@
     //! 创建组件节点
     function createComponent(vnode, insertedVnodeQueue, parentElm, refElm) {
       var i = vnode.data;
+      // 是否有钩子函数可以作为判断是否为组件的唯一条件
       if (isDef(i)) {
         var isReactivated = isDef(vnode.componentInstance) && i.keepAlive;
         if (isDef(i = i.hook) && isDef(i = i.init)) {
+          //! 执行init钩子函数
           i(vnode, false /* hydrating */);
         }
         // after calling the init hook, if the vnode is a child component

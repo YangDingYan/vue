@@ -44,10 +44,12 @@ const componentVNodeHooks = {
       const mountedNode: any = vnode // work around flow
       componentVNodeHooks.prepatch(mountedNode, mountedNode)
     } else {
+      //! 实例化
       const child = vnode.componentInstance = createComponentInstanceForVnode(
         vnode,
         activeInstance
       )
+      //! 挂载
       child.$mount(hydrating ? vnode.elm : undefined, hydrating)
     }
   },
@@ -97,9 +99,9 @@ const componentVNodeHooks = {
 }
 
 const hooksToMerge = Object.keys(componentVNodeHooks)
-
+//* 创建组件节点 + 实例
 export function createComponent (
-  Ctor: Class<Component> | Function | Object | void,
+  Ctor: Class<Component> | Function | Object | void,  //! 子类构造器 | 子组件的配置对象
   data: ?VNodeData,
   context: Component,
   children: ?Array<VNode>,
@@ -109,9 +111,12 @@ export function createComponent (
     return
   }
 
+  //* Vue.options里的_base属性存储Vue构造器
   const baseCtor = context.$options._base
 
   // plain options object: turn it into a constructor
+  //* 针对局部组件注册场景
+  //* 局部注册添加的是一个子组件的配置对象，而全局注册添加的是一个子类构造器
   if (isObject(Ctor)) {
     Ctor = baseCtor.extend(Ctor)
   }
@@ -146,6 +151,7 @@ export function createComponent (
 
   data = data || {}
 
+  //* 构造器配置合并
   // resolve constructor options in case global mixins are applied after
   // component constructor creation
   resolveConstructorOptions(Ctor)
@@ -182,11 +188,13 @@ export function createComponent (
     }
   }
 
+  //! 挂载组件钩子
   // install component management hooks onto the placeholder node
   installComponentHooks(data)
 
   // return a placeholder vnode
   const name = Ctor.options.name || tag
+  //* 创建子组件vnode，名称以 vue-component- 开头
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
     data, undefined, undefined, undefined, context,

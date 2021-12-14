@@ -149,6 +149,8 @@ export function createPatchFunction(backend) {
     }
 
     vnode.isRootInsert = !nested // for transition enter check
+    //! 直接先尝试创建：子组件;
+    // 递归创建子组件真实节点,直到完成所有子组件的渲染才进行根节点的真实节点插入
     if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
       return
     }
@@ -220,9 +222,11 @@ export function createPatchFunction(backend) {
   //! 创建组件节点
   function createComponent(vnode, insertedVnodeQueue, parentElm, refElm) {
     let i = vnode.data
+    // 是否有钩子函数可以作为判断是否为组件的唯一条件
     if (isDef(i)) {
       const isReactivated = isDef(vnode.componentInstance) && i.keepAlive
       if (isDef(i = i.hook) && isDef(i = i.init)) {
+        //! 执行init钩子函数
         i(vnode, false /* hydrating */)
       }
       // after calling the init hook, if the vnode is a child component
