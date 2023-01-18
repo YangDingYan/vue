@@ -12,7 +12,7 @@ import { extend, mergeOptions, formatComponentName } from '../util/index'
 
 let uid = 0
 
-export function initMixin (Vue: Class<Component>) {
+export function initMixin(Vue: Class<Component>) {
   Vue.prototype._init = function (options?: Object) {
     const vm: Component = this //key: this 在 new Vue() 之后, 已经指代当前解析的实例对象了 「对象引用」
     // a uid 标记组件实例的个数(标识)
@@ -56,11 +56,11 @@ export function initMixin (Vue: Class<Component>) {
     vm._self = vm  // 自身持有自身[引用类型哦]
     initLifecycle(vm) //* 生命周期的初始化工作, 初始化了很多变量。最主要是设置了父子组件间的引用关系「即新增了 $parent/$children 属性/值 来构建」 【Lifecycle】
     initEvents(vm) //* 注册事件。注意：这里注册的不是自己的，而是父组件的。因为很明显父组件的监听器才会注册到子组件身上     【Event】
-    initRender(vm) //* render执行前的准备工作，并未真的开始执行。比如处理父子继承关系等
+    initRender(vm) //* render执行前的准备工作，并未真的开始执行。在此处-处理父子继承关系等
     callHook(vm, 'beforeCreate') //! 准备工作完成，接下来进入「create」阶段
     initInjections(vm) // resolve injections before data/props         【inject】
     initState(vm) //* 「options.props、methods、data、computed、watch」按顺序在这里初始化 
-                  //? [响应式系统]：和数据状态有关的几项，在构建时时有上述执行的[顺序]的 ？ 【reactivity】
+    //? [响应式系统]：和数据状态有关的几项，在构建时时有上述执行的[顺序]的 ？ 【reactivity】
     initProvide(vm) // resolve provide after data/props                【provide】
     callHook(vm, 'created') //! 「create」阶段完成
 
@@ -81,7 +81,7 @@ export function initMixin (Vue: Class<Component>) {
   }
 }
 
-export function initInternalComponent (vm: Component, options: InternalComponentOptions) {
+export function initInternalComponent(vm: Component, options: InternalComponentOptions) {
   const opts = vm.$options = Object.create(vm.constructor.options)
   // doing this because it's faster than dynamic enumeration.
   const parentVnode = options._parentVnode
@@ -100,7 +100,7 @@ export function initInternalComponent (vm: Component, options: InternalComponent
   }
 }
 
-export function resolveConstructorOptions (Ctor: Class<Component>) {
+export function resolveConstructorOptions(Ctor: Class<Component>) {
   let options = Ctor.options
   if (Ctor.super) {
     const superOptions = resolveConstructorOptions(Ctor.super)
@@ -124,7 +124,7 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
   return options
 }
 
-function resolveModifiedOptions (Ctor: Class<Component>): ?Object {
+function resolveModifiedOptions(Ctor: Class<Component>): ?Object {
   let modified
   const latest = Ctor.options
   const sealed = Ctor.sealedOptions

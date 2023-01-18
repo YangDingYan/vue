@@ -1,6 +1,6 @@
 /*!
  * Vue.js v2.6.14
- * (c) 2014-2021 Evan You
+ * (c) 2014-2023 Evan You
  * Released under the MIT License.
  */
 (function (global, factory) {
@@ -3518,7 +3518,7 @@
 
   /*  */
 
-  function initRender (vm) {
+  function initRender(vm) {
     vm._vnode = null; // the root of the child tree
     vm._staticTrees = null; // v-once cached trees
     var options = vm.$options;
@@ -3552,7 +3552,7 @@
 
   var currentRenderingInstance = null;
 
-  function renderMixin (Vue) {
+  function renderMixin(Vue) {
     // install runtime convenience helpers
     installRenderHelpers(Vue.prototype);
 
@@ -3563,7 +3563,7 @@
     //*: 实例上用来执行vm.options.render的
     Vue.prototype._render = function () {
       console.log(("--实例vm-" + (this._uid) + "执行了真正的render=>dom tree"));
-      
+
       var vm = this;
       var ref = vm.$options;
       var render = ref.render;
@@ -3940,7 +3940,7 @@
     }
   }
 
-  function initLifecycle (vm) {
+  function initLifecycle(vm) {
     var options = vm.$options;
 
     // locate first non-abstract parent
@@ -3966,7 +3966,7 @@
     vm._isBeingDestroyed = false;
   }
 
-  function lifecycleMixin (Vue) {
+  function lifecycleMixin(Vue) {
     //* 在renderWatcher中的执行语法: vm._update(vm._render(), hydrating) => 可见核心: vm.__pathc__
     Vue.prototype._update = function (vnode, hydrating) {
       var vm = this;
@@ -4065,7 +4065,7 @@
   }
 
   //! beforeMount + mounted::用来执行[render => vnode tree => 渲染], 归属于web平台, 在platforms/web/runtime/index.js的$mount上调用
-  function mountComponent (
+  function mountComponent(
     vm,
     el,
     hydrating
@@ -4093,7 +4093,7 @@
     }
     //* 生命周期呀: beforeMount
     callHook(vm, 'beforeMount');
-     // 定义updateComponent方法，在watch回调时调用
+    //! 定义updateComponent方法，在watch回调时调用
     var updateComponent;
     /* istanbul ignore if */
     if ( config.performance && mark) {
@@ -4115,7 +4115,7 @@
       };
     } else {
       updateComponent = function () {
-        //? render函数渲染成虚拟DOM， 虚拟DOM渲染成真实的DOM
+        //? render函数会生成虚拟DOM， 虚拟DOM将渲染成真实的DOM
         vm._update(vm._render(), hydrating);
       };
     }
@@ -4124,7 +4124,7 @@
     // since the watcher's initial patch may call $forceUpdate (e.g. inside child
     // component's mounted hook), which relies on vm._watcher being already defined
     var a = new Watcher(vm, updateComponent, noop, {
-      before: function before () {
+      before: function before() {
         if (vm._isMounted && !vm._isDestroyed) {
           callHook(vm, 'beforeUpdate');
         }
@@ -4142,7 +4142,7 @@
     return vm
   }
 
-  function updateChildComponent (
+  function updateChildComponent(
     vm,
     propsData,
     listeners,
@@ -4223,14 +4223,14 @@
     }
   }
 
-  function isInInactiveTree (vm) {
+  function isInInactiveTree(vm) {
     while (vm && (vm = vm.$parent)) {
       if (vm._inactive) { return true }
     }
     return false
   }
 
-  function activateChildComponent (vm, direct) {
+  function activateChildComponent(vm, direct) {
     if (direct) {
       vm._directInactive = false;
       if (isInInactiveTree(vm)) {
@@ -4248,7 +4248,7 @@
     }
   }
 
-  function deactivateChildComponent (vm, direct) {
+  function deactivateChildComponent(vm, direct) {
     if (direct) {
       vm._directInactive = true;
       if (isInInactiveTree(vm)) {
@@ -4264,7 +4264,7 @@
     }
   }
 
-  function callHook (vm, hook) {
+  function callHook(vm, hook) {
     // #7573 disable dep collection when invoking lifecycle hooks
     pushTarget();
     var handlers = vm.$options[hook];
@@ -4470,7 +4470,7 @@
    * and fires callback when the expression value changes.
    * This is used for both the $watch() api and directives.
    */
-  var Watcher = function Watcher (
+  var Watcher = function Watcher(
     vm,                //* 该watcher实例归属于的 vm实例 
     expOrFn,   //! 可能是'data.a.b'的watcher[用户Watcher] + [computedWatcher + renderWatcher] 
     cb,                 //!
@@ -4507,7 +4507,7 @@
       //key: renderWatcher中, 此处this.getter = 渲染流程:() => { vm._update(vm._render(), hydrating) };
       //key: 自定义的watch, 也是在此处进行内部的获取
       //key: computed等等
-      this.getter = expOrFn;            
+      this.getter = expOrFn;
     } else {
       //key: state数据响应式拦截
       this.getter = parsePath(expOrFn);
@@ -4529,7 +4529,7 @@
   /**
    * Evaluate the getter, and re-collect dependencies.
    */
-  //! fn get: 1. 为了把 初始化创建的watcher 主动地 挂到对应的Deps里去 2.renderWatcher中启动渲染
+  //! fn get: 1. 为了把 初始化创建的watcher 主动地 挂到对应的Deps里去 2.renderWatcher中自启动渲染
   //!       3. watcher被通知时, 执行‘依赖’,其实是构建时的可执行函数
   Watcher.prototype.get = function get () {
     pushTarget(this); //* 把当前执行环境的watcher实例, 挂载给Dep.target => 这样在此时的执勤上下文中，所需要创建的dep实例
@@ -5043,7 +5043,7 @@
 
   var uid$2 = 0;
 
-  function initMixin (Vue) {
+  function initMixin(Vue) {
     Vue.prototype._init = function (options) {
       var vm = this; //key: this 在 new Vue() 之后, 已经指代当前解析的实例对象了 「对象引用」
       // a uid 标记组件实例的个数(标识)
@@ -5085,11 +5085,11 @@
       vm._self = vm;  // 自身持有自身[引用类型哦]
       initLifecycle(vm); //* 生命周期的初始化工作, 初始化了很多变量。最主要是设置了父子组件间的引用关系「即新增了 $parent/$children 属性/值 来构建」 【Lifecycle】
       initEvents(vm); //* 注册事件。注意：这里注册的不是自己的，而是父组件的。因为很明显父组件的监听器才会注册到子组件身上     【Event】
-      initRender(vm); //* render执行前的准备工作，并未真的开始执行。比如处理父子继承关系等
+      initRender(vm); //* render执行前的准备工作，并未真的开始执行。在此处-处理父子继承关系等
       callHook(vm, 'beforeCreate'); //! 准备工作完成，接下来进入「create」阶段
       initInjections(vm); // resolve injections before data/props         【inject】
       initState(vm); //* 「options.props、methods、data、computed、watch」按顺序在这里初始化 
-                    //? [响应式系统]：和数据状态有关的几项，在构建时时有上述执行的[顺序]的 ？ 【reactivity】
+      //? [响应式系统]：和数据状态有关的几项，在构建时时有上述执行的[顺序]的 ？ 【reactivity】
       initProvide(vm); // resolve provide after data/props                【provide】
       callHook(vm, 'created'); //! 「create」阶段完成
 
@@ -5110,7 +5110,7 @@
     };
   }
 
-  function initInternalComponent (vm, options) {
+  function initInternalComponent(vm, options) {
     var opts = vm.$options = Object.create(vm.constructor.options);
     // doing this because it's faster than dynamic enumeration.
     var parentVnode = options._parentVnode;
@@ -5129,7 +5129,7 @@
     }
   }
 
-  function resolveConstructorOptions (Ctor) {
+  function resolveConstructorOptions(Ctor) {
     var options = Ctor.options;
     if (Ctor.super) {
       var superOptions = resolveConstructorOptions(Ctor.super);
@@ -5153,7 +5153,7 @@
     return options
   }
 
-  function resolveModifiedOptions (Ctor) {
+  function resolveModifiedOptions(Ctor) {
     var modified;
     var latest = Ctor.options;
     var sealed = Ctor.sealedOptions;
@@ -9245,6 +9245,8 @@
   Vue.config.isUnknownElement = isUnknownElement;
 
   // install platform runtime directives & components
+  //? 导出全局fn Vue前, 注册全局内部directives指令: v-model、v-show
+  //?                  注册全局内部components组件: transition、transition-group
   extend(Vue.options.directives, platformDirectives);
   extend(Vue.options.components, platformComponents);
 
@@ -9498,12 +9500,16 @@
   var isIgnoreNewlineTag = makeMap('pre,textarea', true);
   var shouldIgnoreFirstNewline = function (tag, html) { return tag && isIgnoreNewlineTag(tag) && html[0] === '\n'; };
 
-  function decodeAttr (value, shouldDecodeNewlines) {
+  function decodeAttr(value, shouldDecodeNewlines) {
     var re = shouldDecodeNewlines ? encodedAttrWithNewLines : encodedAttr;
     return value.replace(re, function (match) { return decodingMap[match]; })
   }
 
-  function parseHTML (html, options) {
+  /*
+    简单理解：遍历解析查找文件中的各个标签，解析到每个开始标签时，调用options.start方法进行处理；
+                                    解析到每个结束标签时，调用options.end方法进行处理。
+  */
+  function parseHTML(html, options) {
     var stack = [];
     var expectHTML = options.expectHTML;
     var isUnaryTag = options.isUnaryTag || no;
@@ -9631,12 +9637,12 @@
     // Clean up any remaining tags
     parseEndTag();
 
-    function advance (n) {
+    function advance(n) {
       index += n;
       html = html.substring(n);
     }
 
-    function parseStartTag () {
+    function parseStartTag() {
       var start = html.match(startTagOpen);
       if (start) {
         var match = {
@@ -9661,7 +9667,7 @@
       }
     }
 
-    function handleStartTag (match) {
+    function handleStartTag(match) {
       var tagName = match.tagName;
       var unarySlash = match.unarySlash;
 
@@ -9704,7 +9710,7 @@
       }
     }
 
-    function parseEndTag (tagName, start, end) {
+    function parseEndTag(tagName, start, end) {
       var pos, lowerCasedTagName;
       if (start == null) { start = index; }
       if (end == null) { end = index; }
@@ -12106,8 +12112,9 @@
     return el && el.innerHTML
   });
 
-  //? 重新定义$mount,为包含编译器和不包含编译器的版本提供不同封装，最终调用的是缓存原型上的$mount方法
+  //? 重新定义$mount,为包含编译器(Dev)和不包含编译器(Production)的版本提供不同封装，<最终调用>的是缓存原型上的$mount方法
   var mount = Vue.prototype.$mount;
+  // console.log('first mount', mount)
   Vue.prototype.$mount = function (
     el,
     hydrating
@@ -12185,7 +12192,7 @@
     }
     //! 挂载DOM => Tree上
     //? 无论是template模板还是手写render函数最终调用缓存的$mount方法
-    //* 用当前活跃的 vm对象this 来执行挂载 ==> 其实就是挂载当前的实例
+    //* 用当前活跃的 vm对象this 来执行挂载 ==> 其实就是挂载到当前的实例
     console.log(("实例vm-" + (this._uid) + "的render已获得，开始真正的mount"), this.$options.render);
     return mount.call(this, el, hydrating)
   };
@@ -12206,6 +12213,7 @@
     }
   }
 
+  //! 只有在"dev-有编译器版本"中, 才会有这个compile属性 
   Vue.compile = compileToFunctions;
 
   /*

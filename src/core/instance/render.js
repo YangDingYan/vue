@@ -16,7 +16,7 @@ import VNode, { createEmptyVNode } from '../vdom/vnode'
 
 import { isUpdatingChildComponent } from './lifecycle'
 
-export function initRender (vm: Component) {
+export function initRender(vm: Component) {
   vm._vnode = null // the root of the child tree
   vm._staticTrees = null // v-once cached trees
   const options = vm.$options
@@ -47,6 +47,8 @@ export function initRender (vm: Component) {
     }, true)
   } else {
     defineReactive(vm, '$attrs', parentData && parentData.attrs || emptyObject, null, true)
+    //! 用法：包含了父作用域中的(不含.native修饰器的)v-on事件监听器。它可以通过v-on="$listeners"传入内部组件——在创建更高层次的组件时非常有用。
+    //* 每个组件实例上，都有this.$listeners属性，存储了它[直接父组件]的[所有v-on事件监听器]
     defineReactive(vm, '$listeners', options._parentListeners || emptyObject, null, true)
   }
 }
@@ -54,11 +56,11 @@ export function initRender (vm: Component) {
 export let currentRenderingInstance: Component | null = null
 
 // for testing only
-export function setCurrentRenderingInstance (vm: Component) {
+export function setCurrentRenderingInstance(vm: Component) {
   currentRenderingInstance = vm
 }
 
-export function renderMixin (Vue: Class<Component>) {
+export function renderMixin(Vue: Class<Component>) {
   // install runtime convenience helpers
   installRenderHelpers(Vue.prototype)
 
@@ -69,7 +71,7 @@ export function renderMixin (Vue: Class<Component>) {
   //*: 实例上用来执行vm.options.render的
   Vue.prototype._render = function (): VNode {
     console.log(`--实例vm-${this._uid}执行了真正的render=>dom tree`)
-    
+
     const vm: Component = this
     const { render, _parentVnode } = vm.$options
 

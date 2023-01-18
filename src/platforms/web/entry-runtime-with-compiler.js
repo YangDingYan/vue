@@ -1,12 +1,17 @@
 /* @flow */
+/**
+ *! 本文件是runtime-with-compiler (开发)版本的编译入口文件,
+ *       
+ */
+
 
 import config from 'core/config'
 import { warn, cached } from 'core/util/index'
 import { mark, measure } from 'core/util/perf'
 
-import Vue from './runtime/index'
+import Vue from './runtime/index' //! 运行时-平台-核心包
 import { query } from './util/index'
-import { compileToFunctions } from './compiler/index'
+import { compileToFunctions } from './compiler/index' //! 编译模式-平台-核心包
 import { shouldDecodeNewlines, shouldDecodeNewlinesForHref } from './util/compat'
 
 /* 从 scripts/config.js 中可以识别出本文件是 [runtime + compiler] 版本的 [入口] */
@@ -16,8 +21,9 @@ const idToTemplate = cached(id => {
   return el && el.innerHTML
 })
 
-//? 重新定义$mount,为包含编译器和不包含编译器的版本提供不同封装，最终调用的是缓存原型上的$mount方法
+//? 重新定义$mount,为包含编译器(Dev)和不包含编译器(Production)的版本提供不同封装，<最终调用>的是缓存原型上的$mount方法
 const mount = Vue.prototype.$mount
+// console.log('first mount', mount)
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
@@ -93,7 +99,7 @@ Vue.prototype.$mount = function (
   }
   //! 挂载DOM => Tree上
   //? 无论是template模板还是手写render函数最终调用缓存的$mount方法
-  //* 用当前活跃的 vm对象this 来执行挂载 ==> 其实就是挂载当前的实例
+  //* 用当前活跃的 vm对象this 来执行挂载 ==> 其实就是挂载到当前的实例
   console.log(`实例vm-${this._uid}的render已获得，开始真正的mount`, this.$options.render)
   return mount.call(this, el, hydrating)
 }
@@ -114,6 +120,7 @@ function getOuterHTML(el: Element): string {
   }
 }
 
+//! 只有在"dev-有编译器版本"中, 才会有这个compile属性 
 Vue.compile = compileToFunctions
 
 export default Vue

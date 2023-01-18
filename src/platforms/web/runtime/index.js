@@ -27,6 +27,8 @@ Vue.config.getTagNamespace = getTagNamespace
 Vue.config.isUnknownElement = isUnknownElement
 
 // install platform runtime directives & components
+//? 导出全局fn Vue前, 注册全局内部directives指令: v-model、v-show
+//?                  注册全局内部components组件: transition、transition-group
 extend(Vue.options.directives, platformDirectives)
 extend(Vue.options.components, platformComponents)
 

@@ -11,10 +11,11 @@ const isSpecialTag = makeMap('script,style,template', true)
 /**
  * Parse a single-file component (*.vue) file into an SFC Descriptor Object.
  */
-export function parseComponent (
+export function parseComponent(
   content: string,
   options?: Object = {}
 ): SFCDescriptor {
+  // * 表示.vue中各个代码块的对象: parseHTML生成后 => vue-loader进行最后的构造
   const sfc: SFCDescriptor = {
     template: null,
     script: null,
@@ -41,8 +42,8 @@ export function parseComponent (
       sfc.errors.push(data)
     }
   }
-
-  function start (
+  // * 主要函数一
+  function start(
     tag: string,
     attrs: Array<ASTAttr>,
     unary: boolean,
@@ -75,7 +76,7 @@ export function parseComponent (
     }
   }
 
-  function checkAttrs (block: SFCBlock, attrs: Array<ASTAttr>) {
+  function checkAttrs(block: SFCBlock, attrs: Array<ASTAttr>) {
     for (let i = 0; i < attrs.length; i++) {
       const attr = attrs[i]
       if (attr.name === 'lang') {
@@ -92,8 +93,8 @@ export function parseComponent (
       }
     }
   }
-
-  function end (tag: string, start: number) {
+  // * 主要函数二
+  function end(tag: string, start: number) {
     if (depth === 1 && currentBlock) {
       currentBlock.end = start
       let text = content.slice(currentBlock.start, currentBlock.end)
@@ -111,7 +112,7 @@ export function parseComponent (
     depth--
   }
 
-  function padContent (block: SFCBlock, pad: true | "line" | "space") {
+  function padContent(block: SFCBlock, pad: true | "line" | "space") {
     if (pad === 'space') {
       return content.slice(0, block.start).replace(replaceRE, ' ')
     } else {
@@ -123,6 +124,7 @@ export function parseComponent (
     }
   }
 
+  // ! SFC真实的执行流程: parseHTML + start + end
   parseHTML(content, {
     warn,
     start,

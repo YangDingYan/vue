@@ -43,7 +43,7 @@ export default class Watcher {
   getter: Function;
   value: any;
 
-  constructor (
+  constructor(
     vm: Component,                  //* 该watcher实例归属于的 vm实例 
     expOrFn: string | Function,     //! 可能是'data.a.b'的watcher[用户Watcher] + [computedWatcher + renderWatcher] 
     cb: Function,                   //!
@@ -81,7 +81,7 @@ export default class Watcher {
       //key: renderWatcher中, 此处this.getter = 渲染流程:() => { vm._update(vm._render(), hydrating) };
       //key: 自定义的watch, 也是在此处进行内部的获取
       //key: computed等等
-      this.getter = expOrFn            
+      this.getter = expOrFn
     } else {
       //key: state数据响应式拦截
       this.getter = parsePath(expOrFn)
@@ -103,9 +103,9 @@ export default class Watcher {
   /**
    * Evaluate the getter, and re-collect dependencies.
    */
-  //! fn get: 1. 为了把 初始化创建的watcher 主动地 挂到对应的Deps里去   2.renderWatcher中启动渲染
+  //! fn get: 1. 为了把 初始化创建的watcher 主动地 挂到对应的Deps里去   2.renderWatcher中自启动渲染
   //!         3. watcher被通知时, 执行‘依赖’,其实是构建时的可执行函数
-  get () {
+  get() {
     pushTarget(this) //* 把当前执行环境的watcher实例, 挂载给Dep.target => 这样在此时的执勤上下文中，所需要创建的dep实例
     let value
     const vm = this.vm
@@ -133,7 +133,7 @@ export default class Watcher {
   /**
    * Add a dependency to this directive.
    */
-  addDep (dep: Dep) {
+  addDep(dep: Dep) {
     const id = dep.id
     if (!this.newDepIds.has(id)) {
       this.newDepIds.add(id)
@@ -147,7 +147,7 @@ export default class Watcher {
   /**
    * Clean up for dependency collection.
    */
-  cleanupDeps () {
+  cleanupDeps() {
     let i = this.deps.length
     while (i--) {
       const dep = this.deps[i]
@@ -169,7 +169,7 @@ export default class Watcher {
    * Subscriber interface.
    * Will be called when a dependency changes.
    */
-  update () {
+  update() {
     /* istanbul ignore else */
     if (this.lazy) {
       this.dirty = true
@@ -184,7 +184,7 @@ export default class Watcher {
    * Scheduler job interface.
    * Will be called by the scheduler.
    */
-  run () {
+  run() {
     if (this.active) {
       const value = this.get()
       if (
@@ -212,7 +212,7 @@ export default class Watcher {
    * Evaluate the value of the watcher.
    * This only gets called for lazy watchers.
    */
-  evaluate () {
+  evaluate() {
     this.value = this.get()
     this.dirty = false
   }
@@ -220,7 +220,7 @@ export default class Watcher {
   /**
    * Depend on all deps collected by this watcher.
    */
-  depend () {
+  depend() {
     let i = this.deps.length
     while (i--) {
       this.deps[i].depend()
@@ -230,7 +230,7 @@ export default class Watcher {
   /**
    * Remove self from all dependencies' subscriber list.
    */
-  teardown () {
+  teardown() {
     if (this.active) {
       // remove self from vm's watcher list
       // this is a somewhat expensive operation so we skip it
