@@ -70,7 +70,7 @@ function write (dest, code, zip) {
       console.log(blue(path.relative(process.cwd(), dest)) + ' ' + getSize(code) + (extra || ''))
       resolve()
     }
-
+    //! 编译文件输出时，尾部添加sourceMap配置
     code += '//# sourceMappingURL=vue.js.map'
     
     fs.writeFile(dest, code, err => {

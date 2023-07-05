@@ -33,6 +33,7 @@ export function initLifecycle(vm: Component) {
   const options = vm.$options
 
   // locate first non-abstract parent
+  // Key：在执行某个子组件的初始化时，在这里会把[当前组件的实例 推到 父组件的$children属性中]
   let parent = options.parent
   if (parent && !options.abstract) {
     while (parent.$options.abstract && parent.$parent) {

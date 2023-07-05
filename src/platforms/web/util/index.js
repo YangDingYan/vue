@@ -6,7 +6,7 @@ export * from './attrs'
 export * from './class'
 export * from './element'
 
-//! DOM模型中 获取节点 其实获取到是 ‘同类集合’或‘包含所有子节点的-根节点’
+//! DOM模型中 获取节点 其实获取到是 ‘同类集合’或‘包含所有子节点的-根节点’ [document.querySelector]
 /**
  * Query an element selector if it's not an element already.
  */

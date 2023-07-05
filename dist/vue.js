@@ -3944,6 +3944,7 @@
     var options = vm.$options;
 
     // locate first non-abstract parent
+    // Key：在执行某个子组件的初始化时，在这里会把[当前组件的实例 推到 父组件的$children属性中]
     var parent = options.parent;
     if (parent && !options.abstract) {
       while (parent.$options.abstract && parent.$parent) {
@@ -4799,6 +4800,10 @@
       } else if (!isReserved(key)) {
         //? 仅到这里, this.xx\this.$data.xx 已经能获取到值了. 第一次render没问题的
         proxy(vm, "_data", key); //? key: 数据代理[将options.data => this._data => this.data => this.xxx]
+        // vm.options.data = { num : 11}
+        // vm._data = vm.options.data
+        // Object.defineProperty(vm, '_data', {get：，set:})
+        // ==> vm.num 《== vm = { get num() {}, set num() {} }
       }
     }
     //* observe data => 为了程序中自动修改[data]时, 能自动地触发render
@@ -5060,7 +5065,7 @@
       // a flag to avoid this being observed
       vm._isVue = true;
       // merge options
-      //? options._isComponent的作用？  => 暂时只需要知道我们自己开发的时候使用的组件，都不是 _isComponent
+      //!  options._isComponent的作用？  => ？暂时只需要知道我们自己开发的时候使用的组件，都不是 _isComponent
       if (options && options._isComponent) {
         // optimize internal component instantiation
         // since dynamic options merging is pretty slow, and none of the
@@ -5084,7 +5089,7 @@
       // expose real self
       vm._self = vm;  // 自身持有自身[引用类型哦]
       initLifecycle(vm); //* 生命周期的初始化工作, 初始化了很多变量。最主要是设置了父子组件间的引用关系「即新增了 $parent/$children 属性/值 来构建」 【Lifecycle】
-      initEvents(vm); //* 注册事件。注意：这里注册的不是自己的，而是父组件的。因为很明显父组件的监听器才会注册到子组件身上     【Event】
+      initEvents(vm); //* 注册事件。注意：这里注册的不是自己的，而是父组件在使用时，在模版上挂载的。因为很明显父组件的监听器才会注册到子组件身上     【Event】
       initRender(vm); //* render执行前的准备工作，并未真的开始执行。在此处-处理父子继承关系等
       callHook(vm, 'beforeCreate'); //! 准备工作完成，接下来进入「create」阶段
       initInjections(vm); // resolve injections before data/props         【inject】
@@ -5187,6 +5192,7 @@
 
   /*  */
 
+  // * Vue就是构造函数function Vue(); initUse方法挂载, 调用执行为手动调用Vue.use()时执行
   function initUse (Vue) {
     Vue.use = function (plugin) {
       var installedPlugins = (this._installedPlugins || (this._installedPlugins = []));
@@ -5788,7 +5794,7 @@
 
   /*  */
 
-  //! DOM模型中 获取节点 其实获取到是 ‘同类集合’或‘包含所有子节点的-根节点’
+  //! DOM模型中 获取节点 其实获取到是 ‘同类集合’或‘包含所有子节点的-根节点’ [document.querySelector]
   /**
    * Query an element selector if it's not an element already.
    */
@@ -12163,7 +12169,7 @@
         //? 这种情况最多了
         template = getOuterHTML(el);
       }
-      //? 在此之前，是对template合法性校验 => 旨在构造形式成 options.template = '<div>...</div>' [一定是该形式]
+      //KEY: 在此之前，是对template合法性校验 => 旨在构造形式成 options.template = '<div>...</div>' [一定是该形式]
       //! 开始-模板编译
       if (template) {
         /* istanbul ignore if */
@@ -12180,7 +12186,7 @@
         }, this);
         var render = ref.render;
         var staticRenderFns = ref.staticRenderFns;
-        options.render = render; //* 这时实例上真实的render函数
+        options.render = render; //* 这是实例上真实的render函数
         options.staticRenderFns = staticRenderFns;
 
         /* istanbul ignore if */
@@ -12201,7 +12207,7 @@
    * Get outerHTML of elements, taking care
    * of SVG elements in IE as well.
    */
-  //* 当vm里没有template属性时, 默认使用el => template位置, 从这里获取.
+  //* 当vm里没有template属性时, 默认使用el =充当=> template位置, 从这里获取.
   function getOuterHTML(el) {
     if (el.outerHTML) {
       // outerHTML属性获取描述元素（包括其后代）的【序列化HTML片段】。它也可以设置为用从给定字符串解析的节点替换元素
@@ -12217,7 +12223,7 @@
   Vue.compile = compileToFunctions;
 
   /*
-  1. innerHTML 和 outerHTML有什么区别
+  1. innerHTML 和 outerHTML有什么区别！
   （1）innerHTML:
     从对象的起始位置到终止位置的全部内容, [不包括]HTML标签。
   （2）outerHTML:

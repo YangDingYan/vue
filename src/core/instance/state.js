@@ -154,6 +154,10 @@ function initData (vm: Component) {
     } else if (!isReserved(key)) {
       //? 仅到这里, this.xx\this.$data.xx 已经能获取到值了. 第一次render没问题的
       proxy(vm, `_data`, key) //? key: 数据代理[将options.data => this._data => this.data => this.xxx]
+      // vm.options.data = { num : 11}
+      // vm._data = vm.options.data
+      // Object.defineProperty(vm, '_data', {get：，set:})
+      // ==> vm.num 《== vm = { get num() {}, set num() {} }
     }
   }
   //* observe data => 为了程序中自动修改[data]时, 能自动地触发render

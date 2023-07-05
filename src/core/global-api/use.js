@@ -2,6 +2,7 @@
 
 import { toArray } from '../util/index'
 
+// * Vue就是构造函数function Vue(); initUse方法挂载, 调用执行为手动调用Vue.use()时执行
 export function initUse (Vue: GlobalAPI) {
   Vue.use = function (plugin: Function | Object) {
     const installedPlugins = (this._installedPlugins || (this._installedPlugins = []))

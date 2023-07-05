@@ -11,30 +11,33 @@
     <div id="app"></div>
     <script src="../dist/vue.js"></script>
     <script>
+        // Vue.component("allComp", {
+        //   template: `<div>allComp-ddddd</div>`
+        // })
+        const selfComp = {
+          name: 'selfComp',
+          template: `<span>selfComp-eeeee</span>`
+        }
         const app = new Vue({
             el: '#app',
-            // template: ''
+            components: {
+              selfComp
+            },
             render: function(h) {
-                // 这里h = createElement
-                // return h('h3', this.title)
                 return h('div', [
                     h('h3', this.title),
-                    h('h4', this.name)
+                    h('h4', this.name),
+                    // h('allComp'),
+                    h('selfComp')
                 ])
             },
             data() {
                 return {
                     title: 'data-VNode Tree上树实现',
-                    name: 'name的属性测试'
+                    name: '全局组件 + 自定义组件'
                 }
             }
         })
-
-        //* 模拟在程序中, 修改数据 => 依赖-render
-        setTimeout(() => {
-            app.$data.title = '我手动修改title,渲染成功啦'
-            console.log('@@@@@@', app)
-        }, 3000)
     </script>
 </body>
 </html>

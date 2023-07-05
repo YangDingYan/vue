@@ -72,7 +72,7 @@ Vue.prototype.$mount = function (
       //? 这种情况最多了
       template = getOuterHTML(el)
     }
-    //? 在此之前，是对template合法性校验 => 旨在构造形式成 options.template = '<div>...</div>' [一定是该形式]
+    //KEY: 在此之前，是对template合法性校验 => 旨在构造形式成 options.template = '<div>...</div>' [一定是该形式]
     //! 开始-模板编译
     if (template) {
       /* istanbul ignore if */
@@ -87,7 +87,7 @@ Vue.prototype.$mount = function (
         delimiters: options.delimiters,
         comments: options.comments
       }, this)
-      options.render = render //* 这时实例上真实的render函数
+      options.render = render //* 这是实例上真实的render函数
       options.staticRenderFns = staticRenderFns
 
       /* istanbul ignore if */
@@ -108,7 +108,7 @@ Vue.prototype.$mount = function (
  * Get outerHTML of elements, taking care
  * of SVG elements in IE as well.
  */
-//* 当vm里没有template属性时, 默认使用el => template位置, 从这里获取.
+//* 当vm里没有template属性时, 默认使用el =充当=> template位置, 从这里获取.
 function getOuterHTML(el: Element): string {
   if (el.outerHTML) {
     // outerHTML属性获取描述元素（包括其后代）的【序列化HTML片段】。它也可以设置为用从给定字符串解析的节点替换元素
@@ -126,7 +126,7 @@ Vue.compile = compileToFunctions
 export default Vue
 
 /*
-1. innerHTML 和 outerHTML有什么区别
+1. innerHTML 和 outerHTML有什么区别！
 （1）innerHTML:
   从对象的起始位置到终止位置的全部内容, [不包括]HTML标签。
 （2）outerHTML:
