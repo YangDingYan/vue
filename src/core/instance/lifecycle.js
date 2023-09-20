@@ -57,7 +57,7 @@ export function initLifecycle(vm: Component) {
 }
 
 export function lifecycleMixin(Vue: Class<Component>) {
-  //* 在renderWatcher中的执行语法: vm._update(vm._render(), hydrating) => 可见核心: vm.__pathc__
+  //* 在renderWatcher中的执行语法: vm._update(vm._render(), hydrating) => 可见核心: vm.__patch__
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     //! $el属性一定要理解: 此时, $el就是从模板里取到的,是什么就是什么
@@ -74,7 +74,7 @@ export function lifecycleMixin(Vue: Class<Component>) {
     /*
       基于所使用的渲染backend: {nodeOpts, modules}, 在入口处挂载Vue.prototype.__patch__方法
     */
-    // 通过是否有旧节点判断是初次渲染还是数据更新
+    //? 通过是否有旧节点判断是初次渲染、还是更新渲染
     if (!prevVnode) {
       //! initial render : 初始化[渲染] => 执行完就已经上图了
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
@@ -84,7 +84,7 @@ export function lifecycleMixin(Vue: Class<Component>) {
        *  vm.$el = <div id="app"><div class="demo">22222222...</div></div>
        */
     } else {
-      //! updates : 数据更新
+      //! updates render : 数据更新 => 进行节点更新
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
     restoreActiveInstance()
@@ -181,7 +181,7 @@ export function mountComponent(
       }
     }
   }
-  //* 生命周期呀: beforeMount
+  //* 生命周期: beforeMount
   callHook(vm, 'beforeMount')
   //! 定义updateComponent方法，在watch回调时调用
   let updateComponent

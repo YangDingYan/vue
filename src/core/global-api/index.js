@@ -51,6 +51,14 @@ export function initGlobalAPI (Vue: GlobalAPI) {
     return obj
   }
 
+  {/* 看这里，定义了默认Vue.options的占位属性，并在其他地方进行预初始化。 主要会参与到组件实例化时的-合并选项中
+    Vue.options = { 
+      components: { keepAlive:{}, Transition:{}, TransitionGroup:{} },
+      directives: { model:{ inserted:f, componentUpdated:f }, show:{ bind:f, update:f, unbind:f } },
+      filters: {}.
+      _base
+    }
+  */}
   Vue.options = Object.create(null)
   ASSET_TYPES.forEach(type => {
     Vue.options[type + 's'] = Object.create(null)
@@ -65,7 +73,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   initUse(Vue)
   initMixin(Vue)
   initExtend(Vue)
-  {/* 这一步是注册了 `Vue.component` ,`Vue.directive` 和 `Vue.filter` 三个方法，
+  {/*这一步是注册了 `Vue.component` ,`Vue.directive` 和 `Vue.filter` 三个方法，
   上面不是有 `Vue.options.components` 等空对象吗，
   这三个方法的作用就是把注册的组件放入对应的容器中。 
   显然可知该三方法为全局api*/}

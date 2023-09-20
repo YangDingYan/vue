@@ -29,7 +29,8 @@ export function initMixin(Vue: Class<Component>) {
     // a flag to avoid this being observed
     vm._isVue = true
     // merge options
-    //!  options._isComponent的作用？  => ？暂时只需要知道我们自己开发的时候使用的组件，都不是 _isComponent
+    //!  options._isComponent的作用？  => ？暂时只需要知道我们自己开发的时候使用的组件，都是_isComponent=false;
+    //!  仅有内置组件，在从template->vnode时，会创建为true的实例。
     if (options && options._isComponent) {
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
@@ -39,6 +40,7 @@ export function initMixin(Vue: Class<Component>) {
       //key：mergeOptions主要做了一个关于 vm.$options的合并操作 
       //* 把构造函数[对象]上的options和创建组件传入的options合并在一起了 => 「组件实例上直接具有了全局某些属性，即全局directives之类的可以直接用了」
       //key: 因为全局的属性和方法是作为构造函数Vue的对象属性存在的，所以实例化的时候，vm自身和原型上都访问不到这些属性;只有Vue.xx能获取到
+      // const VueDefaultOptions = resolveConstructorOptions(vm.constructor); 
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),
         options || {},
@@ -60,7 +62,7 @@ export function initMixin(Vue: Class<Component>) {
     callHook(vm, 'beforeCreate') //! 准备工作完成，接下来进入「create」阶段
     initInjections(vm) // resolve injections before data/props         【inject】
     initState(vm) //* 「options.props、methods、data、computed、watch」按顺序在这里初始化 
-    //? [响应式系统]：和数据状态有关的几项，在构建时时有上述执行的[顺序]的 ？ 【reactivity】
+    //? [响应式系统]：和数据状态有关的几项，在构建时是上述执行的[顺序]的 ？ 【reactivity】
     initProvide(vm) // resolve provide after data/props                【provide】
     callHook(vm, 'created') //! 「create」阶段完成
 

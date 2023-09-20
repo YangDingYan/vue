@@ -1262,7 +1262,9 @@
     childVal,
     vm
   ) {
+    // vm代表是否为Vue创建的实例，否则是子父类的关系
     if (!vm) {
+      // 必须保证子类的data类型是一个函数而不是一个对象
       if (childVal && typeof childVal !== 'function') {
          warn(
           'The "data" option should be a function ' +
@@ -1275,7 +1277,7 @@
       }
       return mergeDataOrFn(parentVal, childVal)
     }
-
+    // vue实例时需要传递vm作为函数的第三个参数
     return mergeDataOrFn(parentVal, childVal, vm)
   };
 
@@ -1311,7 +1313,7 @@
   LIFECYCLE_HOOKS.forEach(function (hook) {
     strats[hook] = mergeHook;
   });
-
+  console.log("--管理options的内置中转：", strats);
   /**
    * Assets
    *
@@ -1408,20 +1410,24 @@
 
   /**
    * Validate component names
+   ** components规范检查函数
    */
   function checkComponents (options) {
+    // 遍历vm.options.components对象，对每个属性值校验
     for (var key in options.components) {
       validateComponentName(key);
     }
   }
 
   function validateComponentName (name) {
+    // 正则判断检测是否为非法的标签，例如数字开头
     if (!new RegExp(("^[a-zA-Z][\\-\\.0-9_" + (unicodeRegExp.source) + "]*$")).test(name)) {
       warn(
         'Invalid component name: "' + name + '". Component names ' +
         'should conform to valid custom element name in html5 specification.'
       );
     }
+    // 不能使用Vue自身自定义的组件名，如slot, component;不能使用html的保留标签，如 h1, svg等
     if (isBuiltInTag(name) || config.isReservedTag(name)) {
       warn(
         'Do not use built-in or reserved HTML elements as component ' +
@@ -1434,17 +1440,21 @@
    * Ensure all props option syntax are normalized into the
    * Object-based format.
    */
+  // props规范校验
   function normalizeProps (options, vm) {
     var props = options.props;
     if (!props) { return }
     var res = {};
     var i, val, name;
+    // props选项数据有两种形式，一种是['a', 'b', 'c'],一种是{ a: { type: 'String', default: 'hahah' }}
+    // 数组
     if (Array.isArray(props)) {
       i = props.length;
       while (i--) {
         val = props[i];
         if (typeof val === 'string') {
           name = camelize(val);
+          // 默认将数组形式的props转换为对象形式。
           res[name] = { type: null };
         } else {
           warn('props must be strings when using array syntax.');
@@ -1459,6 +1469,7 @@
           : { type: val };
       }
     } else {
+      // 非数组，非对象则判定props选项传递非法
       warn(
         "Invalid value for option \"props\": expected an Array or an Object, " +
         "but got " + (toRawType(props)) + ".",
@@ -1524,6 +1535,7 @@
    * Merge two option objects into a new one.
    * Core utility used in both instantiation and inheritance.
    */
+  //! 合并options选项 + 用户配置项校验
   function mergeOptions (
     parent,
     child,
@@ -1556,6 +1568,7 @@
       }
     }
 
+    //! 执行合并的主流程
     var options = {};
     var key;
     for (key in parent) {
@@ -1567,6 +1580,7 @@
       }
     }
     function mergeField (key) {
+      // 如果有自定义选项策略，则使用自定义选项策略，否则选择使用默认策略。
       var strat = strats[key] || defaultStrat;
       options[key] = strat(parent[key], child[key], vm, key);
     }
@@ -3588,7 +3602,7 @@
         // when parent component is patched.
         currentRenderingInstance = vm;
         vnode = render.call(vm._renderProxy, vm.$createElement); //* 执行 vm.render(vm.$createElement)
-        console.log('--根实例上成功递归创建完的未改造VNode Tree：', vnode);
+        console.log(("--实例vm-" + (vm._uid) + "上成功递归创建完的未改造VNode Tree："), vnode);
       } catch (e) {
         handleError(e, vm, "render");
         // return error render result,
@@ -3968,7 +3982,7 @@
   }
 
   function lifecycleMixin(Vue) {
-    //* 在renderWatcher中的执行语法: vm._update(vm._render(), hydrating) => 可见核心: vm.__pathc__
+    //* 在renderWatcher中的执行语法: vm._update(vm._render(), hydrating) => 可见核心: vm.__patch__
     Vue.prototype._update = function (vnode, hydrating) {
       var vm = this;
       //! $el属性一定要理解: 此时, $el就是从模板里取到的,是什么就是什么
@@ -3985,7 +3999,7 @@
       /*
         基于所使用的渲染backend: {nodeOpts, modules}, 在入口处挂载Vue.prototype.__patch__方法
       */
-      // 通过是否有旧节点判断是初次渲染还是数据更新
+      //? 通过是否有旧节点判断是初次渲染、还是更新渲染
       if (!prevVnode) {
         //! initial render : 初始化[渲染] => 执行完就已经上图了
         vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */);
@@ -3995,7 +4009,7 @@
          *  vm.$el = <div id="app"><div class="demo">22222222...</div></div>
          */
       } else {
-        //! updates : 数据更新
+        //! updates render : 数据更新 => 进行节点更新
         vm.$el = vm.__patch__(prevVnode, vnode);
       }
       restoreActiveInstance();
@@ -4092,7 +4106,7 @@
         }
       }
     }
-    //* 生命周期呀: beforeMount
+    //* 生命周期: beforeMount
     callHook(vm, 'beforeMount');
     //! 定义updateComponent方法，在watch回调时调用
     var updateComponent;
@@ -5065,7 +5079,8 @@
       // a flag to avoid this being observed
       vm._isVue = true;
       // merge options
-      //!  options._isComponent的作用？  => ？暂时只需要知道我们自己开发的时候使用的组件，都不是 _isComponent
+      //!  options._isComponent的作用？  => ？暂时只需要知道我们自己开发的时候使用的组件，都是_isComponent=false;
+      //!  仅有内置组件，在从template->vnode时，会创建为true的实例。
       if (options && options._isComponent) {
         // optimize internal component instantiation
         // since dynamic options merging is pretty slow, and none of the
@@ -5075,6 +5090,7 @@
         //key：mergeOptions主要做了一个关于 vm.$options的合并操作 
         //* 把构造函数[对象]上的options和创建组件传入的options合并在一起了 => 「组件实例上直接具有了全局某些属性，即全局directives之类的可以直接用了」
         //key: 因为全局的属性和方法是作为构造函数Vue的对象属性存在的，所以实例化的时候，vm自身和原型上都访问不到这些属性;只有Vue.xx能获取到
+        // const VueDefaultOptions = resolveConstructorOptions(vm.constructor); 
         vm.$options = mergeOptions(
           resolveConstructorOptions(vm.constructor),
           options || {},
@@ -5094,7 +5110,7 @@
       callHook(vm, 'beforeCreate'); //! 准备工作完成，接下来进入「create」阶段
       initInjections(vm); // resolve injections before data/props         【inject】
       initState(vm); //* 「options.props、methods、data、computed、watch」按顺序在这里初始化 
-      //? [响应式系统]：和数据状态有关的几项，在构建时时有上述执行的[顺序]的 ？ 【reactivity】
+      //? [响应式系统]：和数据状态有关的几项，在构建时是上述执行的[顺序]的 ？ 【reactivity】
       initProvide(vm); // resolve provide after data/props                【provide】
       callHook(vm, 'created'); //! 「create」阶段完成
 
@@ -5544,7 +5560,6 @@
       observe(obj);
       return obj
     };
-
     Vue.options = Object.create(null);
     ASSET_TYPES.forEach(function (type) {
       Vue.options[type + 's'] = Object.create(null);

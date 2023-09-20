@@ -123,7 +123,9 @@ strats.data = function (
   childVal: any,
   vm?: Component
 ): ?Function {
+  // vm代表是否为Vue创建的实例，否则是子父类的关系
   if (!vm) {
+    // 必须保证子类的data类型是一个函数而不是一个对象
     if (childVal && typeof childVal !== 'function') {
       process.env.NODE_ENV !== 'production' && warn(
         'The "data" option should be a function ' +
@@ -136,7 +138,7 @@ strats.data = function (
     }
     return mergeDataOrFn(parentVal, childVal)
   }
-
+  // vue实例时需要传递vm作为函数的第三个参数
   return mergeDataOrFn(parentVal, childVal, vm)
 }
 
@@ -172,7 +174,7 @@ function dedupeHooks (hooks) {
 LIFECYCLE_HOOKS.forEach(hook => {
   strats[hook] = mergeHook
 })
-
+console.log("--管理options的内置中转：", strats)
 /**
  * Assets
  *
@@ -269,20 +271,24 @@ const defaultStrat = function (parentVal: any, childVal: any): any {
 
 /**
  * Validate component names
+ ** components规范检查函数
  */
 function checkComponents (options: Object) {
+  // 遍历vm.options.components对象，对每个属性值校验
   for (const key in options.components) {
     validateComponentName(key)
   }
 }
 
 export function validateComponentName (name: string) {
+  // 正则判断检测是否为非法的标签，例如数字开头
   if (!new RegExp(`^[a-zA-Z][\\-\\.0-9_${unicodeRegExp.source}]*$`).test(name)) {
     warn(
       'Invalid component name: "' + name + '". Component names ' +
       'should conform to valid custom element name in html5 specification.'
     )
   }
+  // 不能使用Vue自身自定义的组件名，如slot, component;不能使用html的保留标签，如 h1, svg等
   if (isBuiltInTag(name) || config.isReservedTag(name)) {
     warn(
       'Do not use built-in or reserved HTML elements as component ' +
@@ -295,17 +301,21 @@ export function validateComponentName (name: string) {
  * Ensure all props option syntax are normalized into the
  * Object-based format.
  */
+// props规范校验
 function normalizeProps (options: Object, vm: ?Component) {
   const props = options.props
   if (!props) return
   const res = {}
   let i, val, name
+  // props选项数据有两种形式，一种是['a', 'b', 'c'],一种是{ a: { type: 'String', default: 'hahah' }}
+  // 数组
   if (Array.isArray(props)) {
     i = props.length
     while (i--) {
       val = props[i]
       if (typeof val === 'string') {
         name = camelize(val)
+        // 默认将数组形式的props转换为对象形式。
         res[name] = { type: null }
       } else if (process.env.NODE_ENV !== 'production') {
         warn('props must be strings when using array syntax.')
@@ -320,6 +330,7 @@ function normalizeProps (options: Object, vm: ?Component) {
         : { type: val }
     }
   } else if (process.env.NODE_ENV !== 'production') {
+    // 非数组，非对象则判定props选项传递非法
     warn(
       `Invalid value for option "props": expected an Array or an Object, ` +
       `but got ${toRawType(props)}.`,
@@ -385,6 +396,7 @@ function assertObjectType (name: string, value: any, vm: ?Component) {
  * Merge two option objects into a new one.
  * Core utility used in both instantiation and inheritance.
  */
+//! 合并options选项 + 用户配置项校验
 export function mergeOptions (
   parent: Object,
   child: Object,
@@ -417,6 +429,7 @@ export function mergeOptions (
     }
   }
 
+  //! 执行合并的主流程
   const options = {}
   let key
   for (key in parent) {
@@ -428,6 +441,7 @@ export function mergeOptions (
     }
   }
   function mergeField (key) {
+    // 如果有自定义选项策略，则使用自定义选项策略，否则选择使用默认策略。
     const strat = strats[key] || defaultStrat
     options[key] = strat(parent[key], child[key], vm, key)
   }

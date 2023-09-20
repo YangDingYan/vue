@@ -56,6 +56,7 @@ Vue.component('demo-grid', {
 // bootstrap the demo
 var demo = new Vue({
   el: '#demo',
+  name: "demo-root",
   data: {
     searchQuery: '',
     gridColumns: ['name', 'power'],

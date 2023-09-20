@@ -94,7 +94,7 @@ export function renderMixin(Vue: Class<Component>) {
       // when parent component is patched.
       currentRenderingInstance = vm
       vnode = render.call(vm._renderProxy, vm.$createElement) //* 执行 vm.render(vm.$createElement)
-      console.log('--根实例上成功递归创建完的未改造VNode Tree：', vnode)
+      console.log(`--实例vm-${vm._uid}上成功递归创建完的未改造VNode Tree：`, vnode)
     } catch (e) {
       handleError(e, vm, `render`)
       // return error render result,
