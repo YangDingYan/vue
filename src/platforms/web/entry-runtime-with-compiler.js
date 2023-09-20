@@ -8,17 +8,21 @@ import Vue from './runtime/index'
 import { query } from './util/index'
 import { compileToFunctions } from './compiler/index'
 import { shouldDecodeNewlines, shouldDecodeNewlinesForHref } from './util/compat'
+import { cg } from '../../shared/process-util'
 
 const idToTemplate = cached(id => {
   const el = query(id)
   return el && el.innerHTML
 })
 
+cg("导出Vue构造函数：runtime-with-compiler")
+console.log("compile核心下：覆盖Vue.prototype.$mount, Vue.compile")
 const mount = Vue.prototype.$mount
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
+  console.log(`${this._uid}-${el}-$mount: 手动挂载组件`)
   el = el && query(el)
 
   /* istanbul ignore if */
@@ -98,4 +102,5 @@ function getOuterHTML (el: Element): string {
 
 Vue.compile = compileToFunctions
 
+console.groupEnd()
 export default Vue

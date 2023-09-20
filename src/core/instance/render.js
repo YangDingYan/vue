@@ -15,8 +15,11 @@ import { normalizeScopedSlots } from '../vdom/helpers/normalize-scoped-slots'
 import VNode, { createEmptyVNode } from '../vdom/vnode'
 
 import { isUpdatingChildComponent } from './lifecycle'
+import { cl } from '../../shared/process-util'
 
-export function initRender (vm: Component) {
+export function initRender(vm: Component) {
+  cl("initRender:")
+
   vm._vnode = null // the root of the child tree
   vm._staticTrees = null // v-once cached trees
   const options = vm.$options
@@ -54,11 +57,13 @@ export function initRender (vm: Component) {
 export let currentRenderingInstance: Component | null = null
 
 // for testing only
-export function setCurrentRenderingInstance (vm: Component) {
+export function setCurrentRenderingInstance(vm: Component) {
   currentRenderingInstance = vm
 }
 
-export function renderMixin (Vue: Class<Component>) {
+export function renderMixin(Vue: Class<Component>) {
+  console.log("renderMixin:Vue.prototype.$nextTick, Vue.prototype._render")
+
   // install runtime convenience helpers
   installRenderHelpers(Vue.prototype)
 

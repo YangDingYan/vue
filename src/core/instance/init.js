@@ -9,14 +9,18 @@ import { mark, measure } from '../util/perf'
 import { initLifecycle, callHook } from './lifecycle'
 import { initProvide, initInjections } from './inject'
 import { extend, mergeOptions, formatComponentName } from '../util/index'
+import { cg, cge, cl } from '../../shared/process-util'
 
 let uid = 0
 
 export function initMixin (Vue: Class<Component>) {
+  console.log("initMixin:Vue.prototype._init")
+
   Vue.prototype._init = function (options?: Object) {
     const vm: Component = this
     // a uid
     vm._uid = uid++
+    cg(`${vm._uid}-${options.el}-this._init: 初始化流程开始`)
 
     let startTag, endTag
     /* istanbul ignore if */
@@ -26,6 +30,7 @@ export function initMixin (Vue: Class<Component>) {
       mark(startTag)
     }
 
+    cl(`${options.el}: 构造VM实例的合法options`)
     // a flag to avoid this being observed
     vm._isVue = true
     // merge options
@@ -65,9 +70,12 @@ export function initMixin (Vue: Class<Component>) {
       measure(`vue ${vm._name} init`, startTag, endTag)
     }
 
+    cge()
+    cg()
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }
+    cge()
   }
 }
 
@@ -111,6 +119,8 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
       }
     }
   }
+
+  console.log("resolveConstructorOptions: 获取当前实例的构造函数[多重继承，向上合并]的options: ",Ctor.name, options)
   return options
 }
 

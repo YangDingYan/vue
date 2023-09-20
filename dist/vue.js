@@ -1154,6 +1154,18 @@
     }
   }
 
+  function cg() {
+    console.group.apply(console, arguments);
+  }
+
+  function cge() {
+    console.groupEnd.apply(console, arguments);
+  }
+
+  function cl() {
+    console.log.apply(console, arguments);
+  }
+
   /*  */
 
   /**
@@ -1525,6 +1537,8 @@
     child,
     vm
   ) {
+    cl("mergeOptions");
+
     {
       checkComponents(child);
     }
@@ -2956,7 +2970,9 @@
 
   /*  */
 
-  function installRenderHelpers (target) {
+  function installRenderHelpers(target) {
+    console.log(("installRenderHelpers:" + (target.constructor.name) + ".prototype._o|_n|_s|_l|_t|_q|_i|_m|_f|_k|_b|_v|_e|_u|_g|_d|_p"));
+
     target._o = markOnce;
     target._n = toNumber;
     target._s = toString;
@@ -3498,7 +3514,9 @@
 
   /*  */
 
-  function initRender (vm) {
+  function initRender(vm) {
+    cl("initRender:");
+
     vm._vnode = null; // the root of the child tree
     vm._staticTrees = null; // v-once cached trees
     var options = vm.$options;
@@ -3532,7 +3550,9 @@
 
   var currentRenderingInstance = null;
 
-  function renderMixin (Vue) {
+  function renderMixin(Vue) {
+    console.log("renderMixin:Vue.prototype.$nextTick, Vue.prototype._render");
+
     // install runtime convenience helpers
     installRenderHelpers(Vue.prototype);
 
@@ -3769,7 +3789,8 @@
 
   /*  */
 
-  function initEvents (vm) {
+  function initEvents(vm) {
+    cl("initEvents:");
     vm._events = Object.create(null);
     vm._hasHookEvent = false;
     // init parent attached events
@@ -3781,17 +3802,17 @@
 
   var target;
 
-  function add (event, fn) {
+  function add(event, fn) {
     target.$on(event, fn);
   }
 
-  function remove$1 (event, fn) {
+  function remove$1(event, fn) {
     target.$off(event, fn);
   }
 
-  function createOnceHandler (event, fn) {
+  function createOnceHandler(event, fn) {
     var _target = target;
-    return function onceHandler () {
+    return function onceHandler() {
       var res = fn.apply(null, arguments);
       if (res !== null) {
         _target.$off(event, onceHandler);
@@ -3799,7 +3820,7 @@
     }
   }
 
-  function updateComponentListeners (
+  function updateComponentListeners(
     vm,
     listeners,
     oldListeners
@@ -3809,7 +3830,9 @@
     target = undefined;
   }
 
-  function eventsMixin (Vue) {
+  function eventsMixin(Vue) {
+    console.log("eventMixin:Vue.prototype.$on, Vue.prototype.$once, Vue.prototype.$off, Vue.prototype.$delete, Vue.prototype.$emit");
+
     var hookRE = /^hook:/;
     Vue.prototype.$on = function (event, fn) {
       var vm = this;
@@ -3830,7 +3853,7 @@
 
     Vue.prototype.$once = function (event, fn) {
       var vm = this;
-      function on () {
+      function on() {
         vm.$off(event, on);
         fn.apply(vm, arguments);
       }
@@ -3915,7 +3938,8 @@
     }
   }
 
-  function initLifecycle (vm) {
+  function initLifecycle(vm) {
+    cl("initLifeCycle:");
     var options = vm.$options;
 
     // locate first non-abstract parent
@@ -3941,7 +3965,9 @@
     vm._isBeingDestroyed = false;
   }
 
-  function lifecycleMixin (Vue) {
+  function lifecycleMixin(Vue) {
+    console.log("lifecycleMixin:Vue.prototype._update, Vue.prototype.$forceUpdate, Vue.prototype.$destroy");
+
     Vue.prototype._update = function (vnode, hydrating) {
       var vm = this;
       var prevEl = vm.$el;
@@ -4081,7 +4107,7 @@
     // since the watcher's initial patch may call $forceUpdate (e.g. inside child
     // component's mounted hook), which relies on vm._watcher being already defined
     new Watcher(vm, updateComponent, noop, {
-      before: function before () {
+      before: function before() {
         if (vm._isMounted && !vm._isDestroyed) {
           callHook(vm, 'beforeUpdate');
         }
@@ -4098,7 +4124,7 @@
     return vm
   }
 
-  function updateChildComponent (
+  function updateChildComponent(
     vm,
     propsData,
     listeners,
@@ -4179,14 +4205,14 @@
     }
   }
 
-  function isInInactiveTree (vm) {
+  function isInInactiveTree(vm) {
     while (vm && (vm = vm.$parent)) {
       if (vm._inactive) { return true }
     }
     return false
   }
 
-  function activateChildComponent (vm, direct) {
+  function activateChildComponent(vm, direct) {
     if (direct) {
       vm._directInactive = false;
       if (isInInactiveTree(vm)) {
@@ -4204,7 +4230,7 @@
     }
   }
 
-  function deactivateChildComponent (vm, direct) {
+  function deactivateChildComponent(vm, direct) {
     if (direct) {
       vm._directInactive = true;
       if (isInInactiveTree(vm)) {
@@ -4220,7 +4246,7 @@
     }
   }
 
-  function callHook (vm, hook) {
+  function callHook(vm, hook) {
     // #7573 disable dep collection when invoking lifecycle hooks
     pushTarget();
     var handlers = vm.$options[hook];
@@ -4630,17 +4656,17 @@
     set: noop
   };
 
-  function proxy (target, sourceKey, key) {
-    sharedPropertyDefinition.get = function proxyGetter () {
+  function proxy(target, sourceKey, key) {
+    sharedPropertyDefinition.get = function proxyGetter() {
       return this[sourceKey][key]
     };
-    sharedPropertyDefinition.set = function proxySetter (val) {
+    sharedPropertyDefinition.set = function proxySetter(val) {
       this[sourceKey][key] = val;
     };
     Object.defineProperty(target, key, sharedPropertyDefinition);
   }
 
-  function initState (vm) {
+  function initState(vm) {
     vm._watchers = [];
     var opts = vm.$options;
     if (opts.props) { initProps(vm, opts.props); }
@@ -4656,7 +4682,7 @@
     }
   }
 
-  function initProps (vm, propsOptions) {
+  function initProps(vm, propsOptions) {
     var propsData = vm.$options.propsData || {};
     var props = vm._props = {};
     // cache prop keys so that future props updates can iterate using Array
@@ -4674,7 +4700,7 @@
       {
         var hyphenatedKey = hyphenate(key);
         if (isReservedAttribute(hyphenatedKey) ||
-            config.isReservedAttr(hyphenatedKey)) {
+          config.isReservedAttr(hyphenatedKey)) {
           warn(
             ("\"" + hyphenatedKey + "\" is a reserved attribute and cannot be used as component prop."),
             vm
@@ -4704,7 +4730,7 @@
     toggleObserving(true);
   }
 
-  function initData (vm) {
+  function initData(vm) {
     var data = vm.$options.data;
     data = vm._data = typeof data === 'function'
       ? getData(data, vm)
@@ -4746,7 +4772,7 @@
     observe(data, true /* asRootData */);
   }
 
-  function getData (data, vm) {
+  function getData(data, vm) {
     // #7573 disable dep collection when invoking data getters
     pushTarget();
     try {
@@ -4761,7 +4787,7 @@
 
   var computedWatcherOptions = { lazy: true };
 
-  function initComputed (vm, computed) {
+  function initComputed(vm, computed) {
     // $flow-disable-line
     var watchers = vm._computedWatchers = Object.create(null);
     // computed properties are just getters during SSR
@@ -4804,7 +4830,7 @@
     }
   }
 
-  function defineComputed (
+  function defineComputed(
     target,
     key,
     userDef
@@ -4824,7 +4850,7 @@
       sharedPropertyDefinition.set = userDef.set || noop;
     }
     if (
-        sharedPropertyDefinition.set === noop) {
+      sharedPropertyDefinition.set === noop) {
       sharedPropertyDefinition.set = function () {
         warn(
           ("Computed property \"" + key + "\" was assigned to but it has no setter."),
@@ -4835,8 +4861,8 @@
     Object.defineProperty(target, key, sharedPropertyDefinition);
   }
 
-  function createComputedGetter (key) {
-    return function computedGetter () {
+  function createComputedGetter(key) {
+    return function computedGetter() {
       var watcher = this._computedWatchers && this._computedWatchers[key];
       if (watcher) {
         if (watcher.dirty) {
@@ -4851,12 +4877,12 @@
   }
 
   function createGetterInvoker(fn) {
-    return function computedGetter () {
+    return function computedGetter() {
       return fn.call(this, this)
     }
   }
 
-  function initMethods (vm, methods) {
+  function initMethods(vm, methods) {
     var props = vm.$options.props;
     for (var key in methods) {
       {
@@ -4884,7 +4910,7 @@
     }
   }
 
-  function initWatch (vm, watch) {
+  function initWatch(vm, watch) {
     for (var key in watch) {
       var handler = watch[key];
       if (Array.isArray(handler)) {
@@ -4897,7 +4923,7 @@
     }
   }
 
-  function createWatcher (
+  function createWatcher(
     vm,
     expOrFn,
     handler,
@@ -4913,7 +4939,8 @@
     return vm.$watch(expOrFn, handler, options)
   }
 
-  function stateMixin (Vue) {
+  function stateMixin(Vue) {
+    console.log("stateMixin:Vue.prototype.$data, Vue.prototype.$props, Vue.prototype.$set, Vue.prototype.$delete, Vue.prototype.$watch");
     // flow somehow has problems with directly declared definition object
     // when using Object.defineProperty, so we have to procedurally build up
     // the object here.
@@ -4957,7 +4984,7 @@
         invokeWithErrorHandling(cb, vm, [watcher.value], vm, info);
         popTarget();
       }
-      return function unwatchFn () {
+      return function unwatchFn() {
         watcher.teardown();
       }
     };
@@ -4968,10 +4995,13 @@
   var uid$2 = 0;
 
   function initMixin (Vue) {
+    console.log("initMixin:Vue.prototype._init");
+
     Vue.prototype._init = function (options) {
       var vm = this;
       // a uid
       vm._uid = uid$2++;
+      cg(((vm._uid) + "-" + (options.el) + "-this._init: 初始化流程开始"));
 
       var startTag, endTag;
       /* istanbul ignore if */
@@ -4981,6 +5011,7 @@
         mark(startTag);
       }
 
+      cl(((options.el) + ": 构造VM实例的合法options"));
       // a flag to avoid this being observed
       vm._isVue = true;
       // merge options
@@ -5018,9 +5049,12 @@
         measure(("vue " + (vm._name) + " init"), startTag, endTag);
       }
 
+      cge();
+      cg();
       if (vm.$options.el) {
         vm.$mount(vm.$options.el);
       }
+      cge();
     };
   }
 
@@ -5064,6 +5098,8 @@
         }
       }
     }
+
+    console.log("resolveConstructorOptions: 获取当前实例的构造函数[多重继承，向上合并]的options: ",Ctor.name, options);
     return options
   }
 
@@ -5080,7 +5116,11 @@
     return modified
   }
 
+  cg("VueCore创建");
+
   function Vue (options) {
+    cg("VueApp实例化创建开始");
+    
     if (
       !(this instanceof Vue)
     ) {
@@ -5094,6 +5134,8 @@
   eventsMixin(Vue);
   lifecycleMixin(Vue);
   renderMixin(Vue);
+
+  console.groupEnd();
 
   /*  */
 
@@ -11930,11 +11972,14 @@
     return el && el.innerHTML
   });
 
+  cg("导出Vue构造函数：runtime-with-compiler");
+  console.log("compile核心下：覆盖Vue.prototype.$mount, Vue.compile");
   var mount = Vue.prototype.$mount;
   Vue.prototype.$mount = function (
     el,
     hydrating
   ) {
+    console.log(((this._uid) + "-" + el + "-$mount: 手动挂载组件"));
     el = el && query(el);
 
     /* istanbul ignore if */
@@ -12015,6 +12060,8 @@
   }
 
   Vue.compile = compileToFunctions;
+
+  console.groupEnd();
 
   return Vue;
 

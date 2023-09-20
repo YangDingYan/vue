@@ -12,7 +12,9 @@ import { bindObjectListeners } from './bind-object-listeners'
 import { resolveScopedSlots } from './resolve-scoped-slots'
 import { bindDynamicKeys, prependModifier } from './bind-dynamic-keys'
 
-export function installRenderHelpers (target: any) {
+export function installRenderHelpers(target: any) {
+  console.log(`installRenderHelpers:${target.constructor.name}.prototype._o|_n|_s|_l|_t|_q|_i|_m|_f|_k|_b|_v|_e|_u|_g|_d|_p`)
+
   target._o = markOnce
   target._n = toNumber
   target._s = toString

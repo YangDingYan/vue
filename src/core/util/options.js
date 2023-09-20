@@ -20,6 +20,7 @@ import {
   isBuiltInTag,
   isPlainObject
 } from 'shared/util'
+import { cg, cl } from '../../shared/process-util'
 
 /**
  * Option overwriting strategies are functions that handle
@@ -390,6 +391,8 @@ export function mergeOptions (
   child: Object,
   vm?: Component
 ): Object {
+  cl("mergeOptions")
+
   if (process.env.NODE_ENV !== 'production') {
     checkComponents(child)
   }
