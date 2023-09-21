@@ -391,7 +391,7 @@ export function mergeOptions (
   child: Object,
   vm?: Component
 ): Object {
-  cl("mergeOptions")
+  cl("mergeOptions:")
 
   if (process.env.NODE_ENV !== 'production') {
     checkComponents(child)

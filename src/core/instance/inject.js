@@ -3,8 +3,10 @@
 import { hasOwn } from 'shared/util'
 import { warn, hasSymbol } from '../util/index'
 import { defineReactive, toggleObserving } from '../observer/index'
+import { cl } from '../../shared/process-util'
 
 export function initProvide (vm: Component) {
+  cl(`initProvide:`)
   const provide = vm.$options.provide
   if (provide) {
     vm._provided = typeof provide === 'function'
@@ -14,6 +16,7 @@ export function initProvide (vm: Component) {
 }
 
 export function initInjections (vm: Component) {
+  cl(`initInjections:`)
   const result = resolveInject(vm.$options.inject, vm)
   if (result) {
     toggleObserving(false)

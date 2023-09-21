@@ -22,7 +22,7 @@ Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
-  console.log(`${this._uid}-${el}-$mount: 手动挂载组件`)
+  console.log(`${this._uid}-${el}-$mount: 自动|手动挂载组件`)
   el = el && query(el)
 
   /* istanbul ignore if */

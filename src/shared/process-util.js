@@ -3,11 +3,11 @@ export function cg() {
 }
 
 export function cge() {
-  console.groupEnd(...arguments)
+  console.groupEnd()
 }
 
 export function cgeg() {
-  cge(...arguments)
+  cge()
   cg(...arguments)
 }
 

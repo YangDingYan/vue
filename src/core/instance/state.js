@@ -28,6 +28,7 @@ import {
   isReservedAttribute,
   invokeWithErrorHandling
 } from '../util/index'
+import { cl } from '../../shared/process-util'
 
 const sharedPropertyDefinition = {
   enumerable: true,
@@ -47,6 +48,8 @@ export function proxy(target: Object, sourceKey: string, key: string) {
 }
 
 export function initState(vm: Component) {
+  cl(`initState:`)
+
   vm._watchers = []
   const opts = vm.$options
   if (opts.props) initProps(vm, opts.props)

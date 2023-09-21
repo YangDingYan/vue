@@ -9,7 +9,7 @@ import { mark, measure } from '../util/perf'
 import { initLifecycle, callHook } from './lifecycle'
 import { initProvide, initInjections } from './inject'
 import { extend, mergeOptions, formatComponentName } from '../util/index'
-import { cg, cge, cl } from '../../shared/process-util'
+import { cg, cge, cgeg, cl } from '../../shared/process-util'
 
 let uid = 0
 
@@ -70,9 +70,8 @@ export function initMixin (Vue: Class<Component>) {
       measure(`vue ${vm._name} init`, startTag, endTag)
     }
 
-    cge()
-    cg()
     if (vm.$options.el) {
+      cl(`${vm._uid}-${options.el}: 自动挂载开始`)
       vm.$mount(vm.$options.el)
     }
     cge()

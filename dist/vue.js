@@ -1159,7 +1159,7 @@
   }
 
   function cge() {
-    console.groupEnd.apply(console, arguments);
+    console.groupEnd();
   }
 
   function cl() {
@@ -1537,7 +1537,7 @@
     child,
     vm
   ) {
-    cl("mergeOptions");
+    cl("mergeOptions:");
 
     {
       checkComponents(child);
@@ -2447,6 +2447,7 @@
   /*  */
 
   function initProvide (vm) {
+    cl("initProvide:");
     var provide = vm.$options.provide;
     if (provide) {
       vm._provided = typeof provide === 'function'
@@ -2456,6 +2457,7 @@
   }
 
   function initInjections (vm) {
+    cl("initInjections:");
     var result = resolveInject(vm.$options.inject, vm);
     if (result) {
       toggleObserving(false);
@@ -4247,6 +4249,7 @@
   }
 
   function callHook(vm, hook) {
+    cl(("life-" + hook));
     // #7573 disable dep collection when invoking lifecycle hooks
     pushTarget();
     var handlers = vm.$options[hook];
@@ -4667,6 +4670,8 @@
   }
 
   function initState(vm) {
+    cl("initState:");
+
     vm._watchers = [];
     var opts = vm.$options;
     if (opts.props) { initProps(vm, opts.props); }
@@ -5049,9 +5054,8 @@
         measure(("vue " + (vm._name) + " init"), startTag, endTag);
       }
 
-      cge();
-      cg();
       if (vm.$options.el) {
+        cl(((vm._uid) + "-" + (options.el) + ": 自动挂载开始"));
         vm.$mount(vm.$options.el);
       }
       cge();
@@ -11979,7 +11983,7 @@
     el,
     hydrating
   ) {
-    console.log(((this._uid) + "-" + el + "-$mount: 手动挂载组件"));
+    console.log(((this._uid) + "-" + el + "-$mount: 自动|手动挂载组件"));
     el = el && query(el);
 
     /* istanbul ignore if */
